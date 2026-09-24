@@ -255,7 +255,7 @@
 .card-pay-header { display: flex; align-items: center; gap: 18px; margin-bottom: 30px; }
 .card-success-icon { font-size: 3rem; }
 .card-badge-tag { display: inline-block; background: #d1fae5; color: #065f46; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; margin-bottom: 5px; }
-.card-pay-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 600; color: #111827; margin: 0 0 3px; }
+.card-pay-header h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.9rem; font-weight: 600; color: #111827; margin: 0 0 3px; }
 .card-pay-header p { color: #6b7280; margin: 0; font-size: 0.93rem; }
 .amount-highlight { color: #db2777; font-size: 1.05rem; }
 .card-pay-grid { display: grid; grid-template-columns: 1fr 330px; gap: 28px; align-items: flex-start; }

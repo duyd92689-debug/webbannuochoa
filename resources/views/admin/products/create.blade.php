@@ -173,6 +173,14 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="video_url" class="font-weight-bold" style="font-size:0.9rem;">
+                        <i class="fa-solid fa-video text-danger mr-1"></i> Link Video Review / YouTube / Shorts (Tùy chọn)
+                    </label>
+                    <input type="text" name="video_url" id="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="https://www.youtube.com/watch?v=... hoặc https://www.youtube.com/shorts/...">
+                    <small class="text-muted">Khi thêm link video, khách hàng có thể xem video trải nghiệm mùi hương trực tiếp ngay tại trang sản phẩm.</small>
+                </div>
+
+                <div class="form-group">
                     <label for="description" class="font-weight-bold" style="font-size:0.9rem;">Mô tả sản phẩm</label>
                     <textarea name="description" id="description" rows="4" class="form-control" placeholder="Mô tả hương thơm, các tầng hương (top/heart/base note)...">{{ old('description') }}</textarea>
                 </div>

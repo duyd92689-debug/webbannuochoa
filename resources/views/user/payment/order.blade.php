@@ -46,15 +46,26 @@
                     <div class="order-card-box">
                         <div class="order-card-top">
                             <div class="order-info-group">
-                                <span class="order-id-badge">Đơn hàng #{{ $order->id }}</span>
-                                <span class="order-time">{{ $order->created_at->format('d/m/Y H:i') }}</span>
+                                <span class="order-id-badge">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                    #DH{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
+                                </span>
+                                <span class="order-time">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:3px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    {{ $order->created_at->format('d/m/Y H:i') }}
+                                </span>
                                 @if($order->ghn_order_code)
                                     <span class="ghn-code-pill">
-                                        🚚 Mã GHN: <strong>{{ $order->ghn_order_code }}</strong>
+                                        🚚 GHN: <strong>{{ $order->ghn_order_code }}</strong>
                                     </span>
                                 @endif
                             </div>
                             <div class="order-status-group">
+                                @if($order->gift_wrap || $order->gift_card || $order->gift_message)
+                                    <span class="badge-gift">
+                                        🎁 Quà tặng
+                                    </span>
+                                @endif
                                 <span class="shipping-status-tag {{ $st['class'] }}">{{ $st['text'] }}</span>
                             </div>
                         </div>
@@ -72,8 +83,14 @@
                                             @endif
                                         </div>
                                         <div class="item-mini-info">
-                                            <span class="item-mini-name">{{ $prod->name ?? 'Nước hoa' }}</span>
-                                            <span class="item-mini-meta">Số lượng: x{{ $item->quantity }} · Giá: {{ number_format($item->price, 0, ',', '.') }}₫</span>
+                                            <span class="item-mini-name">{{ $prod->name ?? 'Nước hoa cao cấp' }}</span>
+                                            <div class="item-mini-meta">
+                                                <span>{{ $item->volume_ml ? $item->volume_ml.'ml' : '100ml' }}</span>
+                                                <span class="meta-dot">·</span>
+                                                <span>Số lượng: <strong>x{{ $item->quantity }}</strong></span>
+                                                <span class="meta-dot">·</span>
+                                                <span class="item-price-tag">{{ number_format($item->price, 0, ',', '.') }}₫</span>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
@@ -81,43 +98,47 @@
 
                             <div class="order-finance-summary">
                                 <div class="finance-row">
-                                    <span>Cước vận chuyển (GHN):</span>
-                                    <strong>{{ number_format($order->ghn_total_fee, 0, ',', '.') }} VNĐ</strong>
+                                    <span>Cước vận chuyển GHN:</span>
+                                    <strong>{{ number_format($order->ghn_total_fee, 0, ',', '.') }}₫</strong>
                                 </div>
                                 <div class="finance-row total-row">
                                     <span>Tổng thanh toán:</span>
-                                    <strong class="total-price-highlight">{{ number_format($order->total_price, 0, ',', '.') }} VNĐ</strong>
+                                    <strong class="total-price-highlight">{{ number_format($order->total_price, 0, ',', '.') }}₫</strong>
                                 </div>
                             </div>
                         </div>
 
                         <div class="order-card-footer">
                             <div class="order-receiver-info">
-                                <span>📍 Người nhận: <strong>{{ $order->name }}</strong> ({{ $order->phone }}) - {{ $order->address }}</span>
-                                <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                                <div class="receiver-address">
+                                    <span class="icon-pin">📍</span> 
+                                    <strong>{{ $order->name }}</strong> ({{ $order->phone }}) 
+                                    <span class="addr-text">— {{ $order->address }}</span>
+                                </div>
+                                <div class="payment-method-row">
                                     @php
                                         $lastTx = $order->paymentTransactions?->first();
                                         $gw = $lastTx?->gateway;
                                     @endphp
                                     @if($order->status === 'paid')
                                         @if($gw === 'atm_domestic')
-                                            <span class="badge badge-success" style="background:#10b981; color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600;">✓ Đã thanh toán qua Thẻ ATM Nội Địa</span>
+                                            <span class="pay-badge pay-success">✓ Thẻ ATM Nội Địa (Đã thanh toán)</span>
                                         @elseif($gw === 'atm_international')
-                                            <span class="badge badge-success" style="background:#10b981; color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600;">✓ Đã thanh toán qua Thẻ Quốc Tế (Visa/Master)</span>
+                                            <span class="pay-badge pay-success">✓ Visa/Mastercard (Đã thanh toán)</span>
                                         @else
-                                            <span class="badge badge-success" style="background:#10b981; color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600;">✓ Đã thanh toán qua MoMo</span>
+                                            <span class="pay-badge pay-success">✓ Ví MoMo (Đã thanh toán)</span>
                                         @endif
                                     @elseif($order->status === 'cod_ordered')
-                                        <span class="badge badge-info" style="background:#0284c7; color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600;">💵 Thanh toán COD khi nhận hàng</span>
+                                        <span class="pay-badge pay-cod">💵 Thanh toán khi nhận hàng (COD)</span>
                                     @elseif($order->status === 'pending')
-                                        <span class="badge badge-warning" style="background:#f59e0b; color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600;">⏳ Chờ thanh toán</span>
+                                        <span class="pay-badge pay-pending">⏳ Chờ thanh toán</span>
                                     @endif
                                 </div>
                             </div>
-                            <div class="order-actions" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <div class="order-actions">
                                 @if($order->status === 'pending')
-                                    <a href="{{ route('user.orders.momo.pay', $order->id) }}" class="btn-pay-again" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#a50064,#db2777);color:#fff;font-weight:600;font-size:0.85rem;padding:9px 18px;border-radius:8px;text-decoration:none;transition:all 0.2s;box-shadow:0 3px 10px rgba(165,0,100,0.25);">
-                                        <img src="{{ asset('images/payments/momo.svg') }}" alt="MoMo" style="height:18px;width:18px;border-radius:4px;object-fit:contain;">
+                                    <a href="{{ route('user.orders.momo.pay', $order->id) }}" class="btn-pay-again">
+                                        <img src="{{ asset('images/payments/momo.svg') }}" alt="MoMo" style="height:17px; width:17px; border-radius:3px; object-fit:contain;">
                                         <span>Thanh toán lại qua MoMo</span>
                                     </a>
                                 @endif
@@ -179,10 +200,10 @@
     text-transform: uppercase;
 }
 .orders-page-header h1 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 2.2rem;
     font-weight: 600;
-    color: #111827;
+    color: #1f2937;
     margin: 0 0 6px 0;
 }
 .orders-page-header p {
@@ -251,19 +272,23 @@
 .orders-list-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
 }
 .order-card-box {
     background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #f3e8ee;
-    box-shadow: 0 4px 20px rgba(219, 39, 119, 0.03);
+    border-radius: 18px;
+    border: 1px solid #f0dfe5;
+    box-shadow: 0 6px 24px rgba(75, 20, 40, 0.04);
     overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.order-card-box:hover {
+    box-shadow: 0 10px 30px rgba(75, 20, 40, 0.07);
 }
 .order-card-top {
     padding: 16px 24px;
-    background: #fdfafc;
-    border-bottom: 1px solid #f5ecf0;
+    background: #fffafc;
+    border-bottom: 1px solid #f6ebf0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -278,55 +303,86 @@
 }
 .order-id-badge {
     font-weight: 700;
-    color: #1f2937;
+    color: #831843;
     font-size: 0.95rem;
+    background: #fdf2f8;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid #fbcfe8;
+    display: inline-flex;
+    align-items: center;
 }
 .order-time {
-    color: #9ca3af;
-    font-size: 0.82rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
 }
 .ghn-code-pill {
     background: #eff6ff;
     color: #1e40af;
     border: 1px solid #bfdbfe;
     font-size: 0.8rem;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 9999px;
+    font-weight: 500;
 }
 .ghn-code-pill strong {
     color: #1d4ed8;
 }
 
-.shipping-status-tag {
+.order-status-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.badge-gift {
+    background: #fce7f3;
+    color: #9d174d;
     font-size: 0.8rem;
     font-weight: 700;
     padding: 4px 12px;
+    border-radius: 9999px;
+    border: 1px solid #fbcfe8;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.shipping-status-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 14px;
     border-radius: 9999px;
     display: inline-block;
 }
 .status-pending {
     background: #fef3c7;
-    color: #b45309;
+    color: #92400e;
+    border: 1px solid #fde68a;
 }
 .status-ready {
     background: #e0e7ff;
-    color: #4338ca;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
 }
 .status-shipping {
     background: #dbeafe;
-    color: #1d4ed8;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
 }
 .status-delivered {
     background: #dcfce7;
-    color: #15803d;
+    color: #166534;
+    border: 1px solid #bbf7d0;
 }
 .status-cancelled {
     background: #fee2e2;
-    color: #b91c1c;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
 .order-card-content {
-    padding: 20px 24px;
+    padding: 22px 24px;
     display: grid;
     grid-template-columns: 1fr 280px;
     gap: 24px;
@@ -335,19 +391,19 @@
 .order-items-preview {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 .item-mini-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 .item-mini-thumb {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    border: 1px solid #f3e8ee;
-    background: #fafafa;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    border: 1px solid #f0dfe5;
+    background: #fff8fa;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -362,74 +418,132 @@
 .item-mini-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
 }
 .item-mini-name {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #1f2937;
 }
 .item-mini-meta {
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.meta-dot {
+    color: #d1d5db;
+}
+.item-price-tag {
+    color: #be185d;
+    font-weight: 600;
 }
 
 .order-finance-summary {
-    border-left: 1px solid #f3f4f6;
-    padding-left: 20px;
+    background: #fff8fa;
+    border: 1px solid #fce7f3;
+    border-radius: 14px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 .finance-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: #4b5563;
 }
 .total-row {
     margin-top: 6px;
-    padding-top: 8px;
-    border-top: 1px dashed #e5e7eb;
+    padding-top: 10px;
+    border-top: 1px dashed #fbcfe8;
 }
 .total-row span {
-    font-weight: 600;
-    color: #111827;
+    font-weight: 700;
+    color: #1f2937;
 }
 .total-price-highlight {
-    color: #db2777;
-    font-size: 1.15rem;
+    color: #be185d;
+    font-size: 1.25rem;
+    font-weight: 800;
 }
 
 .order-card-footer {
-    padding: 14px 24px;
+    padding: 16px 24px;
     background: #ffffff;
-    border-top: 1px solid #f5ecf0;
+    border-top: 1px solid #f6ebf0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
 }
 .order-receiver-info {
-    font-size: 0.82rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.receiver-address {
+    line-height: 1.45;
+}
+.receiver-address strong {
+    color: #111827;
+}
+.addr-text {
     color: #6b7280;
 }
-.btn-detail {
-    padding: 8px 16px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    color: #374151;
-    font-size: 0.83rem;
+.payment-method-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.pay-badge {
+    font-size: 0.76rem;
+    padding: 4px 10px;
+    border-radius: 6px;
     font-weight: 600;
-    border-radius: 8px;
+}
+.pay-success {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.pay-cod {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+.pay-pending {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+.order-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.btn-detail {
+    padding: 9px 18px;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    color: #374151;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 10px;
     text-decoration: none;
     transition: all 0.2s;
 }
 .btn-detail:hover {
     border-color: #db2777;
-    color: #db2777;
-    background: #fdf2f8;
+    color: #be185d;
+    background: #fff4f7;
 }
 
 .orders-pagination {

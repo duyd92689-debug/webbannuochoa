@@ -184,6 +184,18 @@ class OrderController extends Controller
         $newStatus = $request->input('status');
         $newShippingStatus = $request->input('shipping_status');
 
+        // Tự động đồng bộ trạng thái giao hàng và trạng thái đơn
+        if ($newShippingStatus === 'delivered' && (!$newStatus || $newStatus === 'pending')) {
+            $newStatus = 'completed';
+        }
+        if ($newStatus === 'completed' && (!$newShippingStatus || $newShippingStatus === 'pending')) {
+            $newShippingStatus = 'delivered';
+        }
+        if ($newStatus === 'cancelled' || $newShippingStatus === 'cancelled') {
+            $newStatus = 'cancelled';
+            $newShippingStatus = 'cancelled';
+        }
+
         // Logic Lab 8: "Nếu đơn hàng ở trạng thái đang giao -> KHÔNG cho Hủy"
         $deliveringStatuses = ['delivering', 'picked', 'storing', 'transporting', 'sorting'];
         if (($newStatus === 'cancelled' || $newShippingStatus === 'cancelled') && in_array($order->shipping_status, $deliveringStatuses)) {
@@ -218,6 +230,13 @@ class OrderController extends Controller
 
                 if (!empty($updates)) {
                     $order->update($updates);
+                }
+
+                if ($newShippingStatus === 'delivered' || $newStatus === 'completed') {
+                    DB::table('payment_transactions')
+                        ->where('order_id', $order->id)
+                        ->where('status', 'pending')
+                        ->update(['status' => 'paid', 'updated_at' => now()]);
                 }
             });
         } catch (\Exception $e) {
@@ -260,10 +279,24 @@ class OrderController extends Controller
                 continue;
             }
 
+            $orderStatus = $bulkStatus;
+            $orderShipping = $bulkShippingStatus;
+
+            if ($orderShipping === 'delivered' && (!$orderStatus || $orderStatus === 'pending')) {
+                $orderStatus = 'completed';
+            }
+            if ($orderStatus === 'completed' && (!$orderShipping || $orderShipping === 'pending')) {
+                $orderShipping = 'delivered';
+            }
+            if ($orderStatus === 'cancelled' || $orderShipping === 'cancelled') {
+                $orderStatus = 'cancelled';
+                $orderShipping = 'cancelled';
+            }
+
             $oldStatus = $order->status;
 
-            DB::transaction(function () use ($order, $oldStatus, $bulkStatus, $bulkShippingStatus) {
-                if ($bulkStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+            DB::transaction(function () use ($order, $oldStatus, $orderStatus, $orderShipping) {
+                if ($orderStatus === 'cancelled' && $oldStatus !== 'cancelled') {
                     foreach ($order->items as $item) {
                         if ($item->perfume) {
                             $item->perfume->increment('stock', $item->quantity);
@@ -272,10 +305,19 @@ class OrderController extends Controller
                 }
 
                 $data = [];
-                if ($bulkStatus) $data['status'] = $bulkStatus;
-                if ($bulkShippingStatus) $data['shipping_status'] = $bulkShippingStatus;
+                if ($orderStatus) $data['status'] = $orderStatus;
+                if ($orderShipping) $data['shipping_status'] = $orderShipping;
 
-                $order->update($data);
+                if (!empty($data)) {
+                    $order->update($data);
+                }
+
+                if ($orderShipping === 'delivered' || $orderStatus === 'completed') {
+                    DB::table('payment_transactions')
+                        ->where('order_id', $order->id)
+                        ->where('status', 'pending')
+                        ->update(['status' => 'paid', 'updated_at' => now()]);
+                }
             });
 
             $updatedCount++;

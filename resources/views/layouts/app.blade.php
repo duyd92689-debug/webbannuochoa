@@ -6,6 +6,10 @@
     <title>@yield('title', 'MyShop')</title>
     <!-- Bao gồm Bootstrap CSS hoặc các file CSS khác -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap&subset=vietnamese" rel="stylesheet">
+    <style>body { font-family: 'Be Vietnam Pro', -apple-system, sans-serif; }</style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">

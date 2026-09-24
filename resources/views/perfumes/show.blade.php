@@ -1,6 +1,48 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts.store')
 
-@section('title', $perfume->name.' · Ha Thu Perfume Studio')
+@section('title', $perfume->name.' · '.$perfume->brand.' · Ha Thu Perfume Studio')
+@section('meta_description', Str::limit(strip_tags($perfume->description ?: 'Mua '.$perfume->name.' của '.$perfume->brand.' chính hãng tại Ha Thu Perfume Studio. Giao hàng toàn quốc, đổi trả 7 ngày.'), 155))
+@section('meta_keywords', $perfume->name.', '.$perfume->brand.', nước hoa chính hãng, '.$perfume->concentration.', Ha Thu Perfume')
+@if($perfume->image_src)
+    @section('og_image', $perfume->image_src)
+@endif
+
+@push('styles')
+@php
+    $productSchema = array_filter([
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $perfume->name,
+        'description' => Str::limit(strip_tags($perfume->description ?? ''), 300),
+        'brand' => [
+            '@type' => 'Brand',
+            'name' => $perfume->brand,
+        ],
+        'image' => $perfume->image_src ? [$perfume->image_src] : null,
+        'sku' => 'HATHU-' . $perfume->id,
+        'offers' => [
+            '@type' => 'Offer',
+            'url' => route('perfumes.show', $perfume),
+            'priceCurrency' => 'VND',
+            'price' => (string) ($perfume->sale_price ?? $perfume->price),
+            'availability' => $perfume->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            'seller' => [
+                '@type' => 'Organization',
+                'name' => 'Ha Thu Perfume Studio',
+            ],
+        ],
+        'aggregateRating' => ($averageRating > 0 && $reviews->total() > 0) ? [
+            '@type' => 'AggregateRating',
+            'ratingValue' => (string) $averageRating,
+            'reviewCount' => (string) $reviews->total(),
+        ] : null,
+    ]);
+@endphp
+<script type="application/ld+json">
+{!! json_encode($productSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+</script>
+@endpush
 
 @section('content')
     <section class="store-container luxury-product-page">
@@ -50,29 +92,29 @@
                     <div class="guarantee-item">
                         <div class="guarantee-icon">🚚</div>
                         <div>
-                            <strong>Freeship toàn quốc</strong>
+                            <strong>Giao hàng toàn quốc</strong>
                             <small>Đóng gói 3 lớp chống vỡ</small>
                         </div>
                     </div>
                     <div class="guarantee-item">
-                        <div class="guarantee-icon">✨</div>
+                        <div class="guarantee-icon">💬</div>
                         <div>
-                            <strong>Đổi trả 14 ngày</strong>
-                            <small>Hỗ trợ đổi mùi linh hoạt</small>
+                            <strong>Hỗ trợ sau mua</strong>
+                            <small>Tư vấn khi cần hỗ trợ</small>
                         </div>
                     </div>
                     <div class="guarantee-item">
                         <div class="guarantee-icon">🛡️</div>
                         <div>
                             <strong>Cam kết chính hãng</strong>
-                            <small>Đền 200% nếu phát hiện giả</small>
+                            <small>Thông tin sản phẩm rõ ràng</small>
                         </div>
                     </div>
                     <div class="guarantee-item">
                         <div class="guarantee-icon">🎁</div>
                         <div>
-                            <strong>Tặng mẫu thử Mini</strong>
-                            <small>Kèm trong mọi đơn hàng</small>
+                            <strong>Tư vấn chọn mùi</strong>
+                            <small>Gợi ý theo sở thích của bạn</small>
                         </div>
                     </div>
                 </div>
@@ -87,6 +129,24 @@
                     <span class="tag-pill">{{ $perfume->category?->name ?? 'Nước hoa' }}</span>
                     <span class="tag-pill">{{ ['nam' => 'Dành cho Nam', 'nu' => 'Dành cho Nữ', 'unisex' => 'Unisex - Mọi giới tính'][$perfume->gender] }}</span>
                     <span class="tag-pill">{{ $perfume->concentration ?: 'Eau de Parfum (EDP)' }}</span>
+                    @php
+                        $directVid = $perfume->videos()->where('is_active', true)->first();
+                        $showVidUrl = $directVid ? $directVid->embed_url : $perfume->embed_video_url;
+                    @endphp
+                    @if($showVidUrl)
+                    <button type="button" class="tag-pill tag-pill-video js-open-video"
+                        data-title="{{ $directVid ? $directVid->title : 'Review & Cận Cảnh ' . $perfume->name }}"
+                        data-embed="{{ $showVidUrl }}"
+                        data-desc="{{ $directVid ? $directVid->description : 'Cảm nhận nốt hương & độ tỏa hương thực tế trên da sau 4 giờ.' }}"
+                        data-views="{{ $directVid ? $directVid->formatted_views : '12.4K' }}"
+                        data-perfume-name="{{ $perfume->name }}"
+                        data-perfume-brand="{{ $perfume->brand }}"
+                        data-perfume-price="{{ number_format($perfume->price) }}đ"
+                        data-perfume-url="{{ route('perfumes.show', $perfume) }}"
+                        data-perfume-img="{{ $perfume->image_src }}">
+                        🎬 Xem Video Review (30s)
+                    </button>
+                    @endif
                 </div>
 
                 {{-- Price Display --}}
@@ -194,7 +254,7 @@
 
                             <label class="addon-card-option">
                                 <input type="checkbox" name="addon_engrave" id="addonEngrave" value="1" onchange="toggleEngraveField()">
-                                <div class="addon-icon">✨</div>
+                                <div class="addon-icon">✒️</div>
                                 <div class="addon-text">
                                     <strong>Khắc tên / Lời chúc Laser lên thân chai</strong>
                                     <small>Cá nhân hóa dấu ấn riêng (Miễn phí quà tặng)</small>
@@ -236,6 +296,21 @@
                     </div>
                 </form>
 
+                <div class="ht-product-utilities">
+                    @auth
+                    <form method="POST" action="{{ route('store.wishlist.toggle', $perfume) }}">@csrf<button type="submit">{{ $isFavorite ? '♥ Đã yêu thích' : '♡ Lưu yêu thích' }}</button></form>
+                    <button type="button" id="openWardrobeModalBtn" class="ht-utility-btn">💎 {{ $inWardrobe ? '✓ Đã trong Tủ hương' : '+ Tủ nước hoa' }}</button>
+                    @if($perfume->stock <= 0)
+                    <form method="POST" action="{{ route('store.stock-alert', $perfume) }}">@csrf<button type="submit">Báo khi có hàng</button></form>
+                    @endif
+                    @endauth
+                    @guest
+                    <a href="{{ route('login') }}">♡ Đăng nhập lưu yêu thích</a>
+                    <a href="{{ route('login') }}">💎 Thêm vào Tủ hương</a>
+                    @endguest
+                    <button type="button" id="openGiftModalBtn" class="ht-utility-btn">🎁 Gửi tặng bạn bè</button>
+                    <a href="{{ route('store.compare', ['ids' => $perfume->id]) }}">⚖ So sánh sản phẩm</a>
+                </div>
                 {{-- Thông số kỹ thuật nhanh --}}
                 <div class="luxury-specs-card">
                     <h3>Thông Tin Chi Tiết</h3>
@@ -265,138 +340,266 @@
             </div>
         </div>
 
+        <section class="ht-scent-story" aria-labelledby="scent-story-title">
+            <div>
+                <span class="ht-eyebrow">CÂU CHUYỆN MÙI HƯƠNG</span>
+                <h2 id="scent-story-title">Một dấu ấn <em>rất riêng.</em></h2>
+                <p>{{ $perfume->description ?: 'Khám phá mùi hương này cùng Ha Thu Perfume Studio. Nếu bạn cần thêm thông tin về các nốt hương, hãy nhắn cho cửa hàng để được tư vấn.' }}</p>
+            </div>
+            <dl>
+                <div><dt>Thương hiệu</dt><dd>{{ $perfume->brand }}</dd></div>
+                <div><dt>Dòng hương</dt><dd>{{ $perfume->concentration ?: 'Chưa cập nhật' }}</dd></div>
+                <div><dt>Dung tích chai</dt><dd>{{ $perfume->volume_ml }} ml</dd></div>
+                <div><dt>Gợi ý cho</dt><dd>{{ ['nam' => 'Nam', 'nu' => 'Nữ', 'unisex' => 'Mọi giới tính'][$perfume->gender] ?? 'Mọi giới tính' }}</dd></div>
+            </dl>
+        </section>
+
+        {{-- ── NỔI BẬT: SHORTS & VIDEO REVIEW CẬN CẢNH MÙI HƯƠNG ── --}}
         @php
-            $scent = $perfume->scent_profile;
+            $perfumeVideos = \App\Models\Video::where('is_active', true)
+                ->where(function($q) use ($perfume) {
+                    $q->where('perfume_id', $perfume->id)
+                      ->orWhere('placement', 'product')
+                      ->orWhere('placement', 'all');
+                })
+                ->orderByRaw('CASE WHEN perfume_id = ? THEN 0 ELSE 1 END', [$perfume->id])
+                ->orderBy('sort_order')
+                ->take(4)
+                ->get();
         @endphp
-
-        {{-- Kim Tự Tháp Tầng Hương (Olfactory Fragrance Notes) --}}
-        <div class="luxury-olfactory-section">
-            <div class="section-title-center">
-                <span class="section-kicker">Trải nghiệm mùi hương độc bản</span>
-                <h2>Kim Tự Tháp Tầng Hương Đặc Trưng</h2>
-                <p>Nghệ thuật hòa quyện của các nốt hương tinh tế lưu giữ suốt cả ngày</p>
-                <div class="mt-3">
-                    <span class="badge badge-pill px-3 py-2" style="background: {{ $scent['badge_color'] }}15; color: {{ $scent['badge_color'] }}; font-size: 0.85rem; font-weight: 700; border: 1.5px solid {{ $scent['badge_color'] }}40; letter-spacing: 0.5px; display: inline-block;">
-                        {{ $scent['family_badge'] }} · {{ $scent['family'] }}
-                    </span>
+        @if($perfumeVideos->isNotEmpty())
+        <section class="ht-video-review-section" id="video-review">
+            <div class="ht-section-heading">
+                <div>
+                    <span class="ht-eyebrow">REVIEW TRỰC DIỆN</span>
+                    <h2>Video Trải Nghiệm & Cận Cảnh Mùi Hương</h2>
+                    <p>Chiêm ngưỡng thiết kế chai thực tế, kiểm tra độ tỏa hương và vòi xịt phun sương.</p>
                 </div>
             </div>
-
-            <div class="pyramid-cards-grid">
-                <div class="pyramid-card">
-                    <div class="pyramid-phase-badge">{{ $scent['top']['time'] }}</div>
-                    <div class="pyramid-icon">{{ $scent['top']['icon'] }}</div>
-                    <h4>{{ $scent['top']['title'] }}</h4>
-                    <p class="notes-desc">{{ $scent['top']['notes'] }}</p>
-                    <small>{{ $scent['top']['desc'] }}</small>
-                    @if(!empty($scent['top']['tags']))
-                        <div class="mt-3 d-flex flex-wrap justify-content-center" style="gap: 5px;">
-                            @foreach($scent['top']['tags'] as $tag)
-                                <span style="font-size: 11px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2px 10px; color: #475569; font-weight: 500;">
-                                    {{ $tag }}
-                                </span>
-                            @endforeach
+            <div class="ht-video-grid">
+                @foreach($perfumeVideos as $pvid)
+                <div class="ht-video-card js-open-video"
+                     data-title="{{ $pvid->title }}"
+                     data-embed="{{ $pvid->embed_url }}"
+                     data-desc="{{ $pvid->description }}"
+                     data-views="{{ $pvid->formatted_views }}"
+                     data-perfume-name="{{ $pvid->perfume ? $pvid->perfume->name : $perfume->name }}"
+                     data-perfume-brand="{{ $pvid->perfume ? $pvid->perfume->brand : $perfume->brand }}"
+                     data-perfume-price="{{ number_format(($pvid->perfume ?: $perfume)->price) . 'đ' }}"
+                     data-perfume-url="{{ route('perfumes.show', $pvid->perfume ?: $perfume) }}"
+                     data-perfume-img="{{ ($pvid->perfume ?: $perfume)->image_src }}"
+                     style="cursor: pointer;"
+                     role="button"
+                     tabindex="0">
+                    <div class="video-preview-wrap">
+                        <img src="{{ $pvid->thumbnail_src ?: $perfume->image_src }}" alt="{{ $pvid->title }}">
+                        <div class="video-play-overlay">
+                            <span class="play-icon">▶</span>
+                            <span class="video-duration">{{ $pvid->duration ?: '0:45' }}</span>
                         </div>
-                    @endif
+                    </div>
+                    <h4>{{ $pvid->title }}</h4>
+                    <p>{{ $pvid->description ?: 'Chuyên gia mùi hương của Ha Thu đánh giá chi tiết độ lưu hương thực tế trên da.' }}</p>
                 </div>
+                @endforeach
+            </div>
+        </section>
+        @endif
 
-                <div class="pyramid-card active-pyramid">
-                    <div class="pyramid-phase-badge">{{ $scent['heart']['time'] }}</div>
-                    <div class="pyramid-icon">{{ $scent['heart']['icon'] }}</div>
-                    <h4>{{ $scent['heart']['title'] }}</h4>
-                    <p class="notes-desc">{{ $scent['heart']['notes'] }}</p>
-                    <small>{{ $scent['heart']['desc'] }}</small>
-                    @if(!empty($scent['heart']['tags']))
-                        <div class="mt-3 d-flex flex-wrap justify-content-center" style="gap: 5px;">
-                            @foreach($scent['heart']['tags'] as $tag)
-                                <span style="font-size: 11px; background: #fff; border: 1px solid #fed7aa; border-radius: 20px; padding: 2px 10px; color: #9a3412; font-weight: 500;">
-                                    {{ $tag }}
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
+        <section class="ht-reviews" id="danh-gia">
+            <div class="ht-section-heading"><div><span class="ht-eyebrow">CẢM NHẬN THỰC TẾ</span><h2>Đánh giá từ khách hàng</h2><p>{{ $reviews->total() }} đánh giá · {{ $averageRating ?: 'Chưa có điểm' }}{{ $averageRating ? '/5 sao' : '' }}</p></div></div>
+            <div class="ht-review-grid">
+                <div>
+                    @forelse($reviews as $review)
+                    <article class="ht-review-card"><div><strong>{{ $review->user?->name ?? 'Khách hàng' }}</strong><span>{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span></div><p>{{ $review->body }}</p>@if($review->image_path)<img src="{{ asset($review->image_path) }}" alt="Ảnh do khách hàng chia sẻ" loading="lazy">@endif<small>{{ $review->created_at->format('d/m/Y') }}</small></article>
+                    @empty<p>Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ cảm nhận.</p>@endforelse
+                    {{ $reviews->links() }}
                 </div>
-
-                <div class="pyramid-card">
-                    <div class="pyramid-phase-badge">{{ $scent['base']['time'] }}</div>
-                    <div class="pyramid-icon">{{ $scent['base']['icon'] }}</div>
-                    <h4>{{ $scent['base']['title'] }}</h4>
-                    <p class="notes-desc">{{ $scent['base']['notes'] }}</p>
-                    <small>{{ $scent['base']['desc'] }}</small>
-                    @if(!empty($scent['base']['tags']))
-                        <div class="mt-3 d-flex flex-wrap justify-content-center" style="gap: 5px;">
-                            @foreach($scent['base']['tags'] as $tag)
-                                <span style="font-size: 11px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2px 10px; color: #475569; font-weight: 500;">
-                                    {{ $tag }}
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
+                <div class="ht-feature-panel">
+                    <h3>Chia sẻ cảm nhận của bạn</h3>
+                    @auth
+                    <form method="POST" action="{{ route('store.review', $perfume) }}" enctype="multipart/form-data" class="ht-review-form">@csrf
+                        <label>Đánh giá<select name="rating" required><option value="5">★★★★★ · Rất thích</option><option value="4">★★★★☆ · Hài lòng</option><option value="3">★★★☆☆ · Khá</option><option value="2">★★☆☆☆ · Chưa hợp</option><option value="1">★☆☆☆☆ · Không hợp</option></select></label>
+                        <label>Cảm nhận<textarea name="body" minlength="10" maxlength="2000" rows="5" required placeholder="Bạn cảm nhận mùi hương như thế nào?">{{ old('body') }}</textarea></label>
+                        <label>Ảnh trải nghiệm (không bắt buộc)<input type="file" name="image" accept="image/jpeg,image/png,image/webp"></label>
+                        <button class="ht-button" type="submit">Gửi đánh giá</button>
+                    </form>
+                    @else<a class="ht-button" href="{{ route('login') }}">Đăng nhập để đánh giá</a>@endauth
                 </div>
             </div>
-
-            {{-- Đánh giá chỉ số mùi hương --}}
-            <div class="fragrance-meters-grid">
-                <div class="meter-box">
-                    <div class="meter-header">
-                        <span>⏳ Độ lưu hương</span>
-                        <strong>{{ $scent['longevity']['text'] }}</strong>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" style="width: {{ $scent['longevity']['percent'] }}%;"></div></div>
-                </div>
-                <div class="meter-box">
-                    <div class="meter-header">
-                        <span>💨 Độ tỏa hương</span>
-                        <strong>{{ $scent['sillage']['text'] }}</strong>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" style="width: {{ $scent['sillage']['percent'] }}%;"></div></div>
-                </div>
-                <div class="meter-box">
-                    <div class="meter-header">
-                        <span>🌙 Thời điểm khuyên dùng</span>
-                        <strong>{{ $scent['season']['text'] }}</strong>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" style="width: {{ $scent['season']['percent'] }}%;"></div></div>
-                </div>
-                <div class="meter-box">
-                    <div class="meter-header">
-                        <span>👔 Phong cách phù hợp</span>
-                        <strong>{{ $scent['style']['text'] }}</strong>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" style="width: {{ $scent['style']['percent'] }}%;"></div></div>
-                </div>
-            </div>
-
-            {{-- Dải các nốt hương chủ đạo --}}
-            @if(!empty($scent['highlight_notes']))
-                <div class="mt-4 pt-3 border-top text-center" style="border-top: 1px solid #f1f5f9;">
-                    <span class="text-muted small text-uppercase font-weight-bold d-block mb-2" style="letter-spacing: 1.5px; font-size: 11px;">
-                        ✨ Các nốt hương chủ đạo định hình phong cách
-                    </span>
-                    <div class="d-flex flex-wrap justify-content-center" style="gap: 8px;">
-                        @foreach($scent['highlight_notes'] as $hNote)
-                            <span class="badge border px-3 py-2" style="font-size: 12px; font-weight: 600; color: #334155; border-radius: 30px; background: #f8fafc; border-color: #e2e8f0;">
-                                ✦ {{ $hNote }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        {{-- Mô tả chi tiết sản phẩm --}}
-        <div class="luxury-description-section">
-            <h2>Mô Tả Sản Phẩm</h2>
-            <div class="luxury-description-content">
-                <p>{{ $perfume->description ?: 'Sản phẩm nước hoa cao cấp được tuyển chọn tỉ mỉ cho bộ sưu tập Ha Thu Perfume Studio. Mỗi giọt tinh dầu là một tuyên ngôn về phong cách và thần thái sang trọng.' }}</p>
-                
-                <p>Nước hoa <strong>{{ $perfume->name }}</strong> từ thương hiệu danh tiếng <strong>{{ $perfume->brand }}</strong> mang đến trải nghiệm hương thơm đỉnh cao, giúp bạn tự tin tỏa sáng trong mọi buổi gặp gỡ, dạ tiệc hay công việc hàng ngày.</p>
-            </div>
-        </div>
-
+        </section>
     </section>
 
-    {{-- Interactive Script for Dynamic Price, Options & Calculations --}}
+    {{-- ── COMBO TIẾT KIỆM GỢI Ý ── --}}
+    <section class="store-container ht-bundle-section">
+        <div class="ht-bundle-card">
+            <div class="bundle-badge">💎 COMBO TIẾT KIỆM ĐẶC QUYỀN</div>
+            <div class="bundle-content">
+                <div class="bundle-items-visual">
+                    <div class="bundle-item">
+                        <img src="{{ $perfume->image_src ?: asset('images/perfume-default.jpg') }}" alt="{{ $perfume->name }}">
+                        <span>Chai Fullsize {{ $perfume->volume_ml }}ml</span>
+                    </div>
+                    <span class="bundle-plus">+</span>
+                    <div class="bundle-item">
+                        <div class="vial-thumb">🧪🧪</div>
+                        <span>02 Sample Chiết 5ml</span>
+                    </div>
+                    <span class="bundle-plus">+</span>
+                    <div class="bundle-item">
+                        <div class="box-thumb">🎁</div>
+                        <span>Hộp Quà Lụa & Thiệp</span>
+                    </div>
+                </div>
+                <div class="bundle-info">
+                    <h3>Combo Trọn Vẹn: {{ $perfume->name }} + 2 Sample + Hộp Quà</h3>
+                    <p>Bộ quà tặng lý tưởng nhất: Vừa sở hữu chai nước hoa yêu thích, vừa khám phá thêm 2 mùi hương mới lạ, đóng gói sẵn trong hộp quà nhung sang trọng.</p>
+                    <div class="bundle-pricing">
+                        @php
+                            $comboOriginal = ($perfume->sale_price ?? $perfume->price) + 200000 + 50000;
+                            $comboPrice = round((($perfume->sale_price ?? $perfume->price) + 90000) / 1000) * 1000;
+                        @endphp
+                        <span class="bundle-price">{{ number_format($comboPrice, 0, ',', '.') }}₫</span>
+                        <del class="bundle-old">{{ number_format($comboOriginal, 0, ',', '.') }}₫</del>
+                        <span class="bundle-save">Tiết kiệm {{ number_format($comboOriginal - $comboPrice, 0, ',', '.') }}₫</span>
+                    </div>
+                    <form action="{{ route('cart.add', $perfume) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="quantity" value="1">
+                        <input type="hidden" name="addon_gift" value="1">
+                        <input type="hidden" name="engrave_text" value="Combo Trọn Vẹn + 2 Sample">
+                        <button type="submit" class="ht-button ht-button-primary">
+                            Mua Ngay Trọn Bộ Combo
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ── RELATED PRODUCTS ── --}}
+    @if($related->isNotEmpty())
+    <section class="store-container ht-related-section" aria-labelledby="related-title">
+        <div class="ht-section-heading">
+            <div>
+                <span class="ht-eyebrow">HƯƠNG THƠM TƯƠNG TỰ</span>
+                <h2 id="related-title">Có thể bạn cũng thích</h2>
+            </div>
+        </div>
+        <div class="ht-related-grid">
+            @foreach($related as $rel)
+            <a href="{{ route('perfumes.show', $rel) }}" class="ht-related-card">
+                <div class="ht-related-img">
+                    @if($rel->image_src)
+                        <img src="{{ $rel->image_src }}" alt="{{ $rel->name }}" loading="lazy">
+                    @else
+                        <span class="ht-related-placeholder">{{ mb_substr($rel->brand, 0, 1) }}</span>
+                    @endif
+                    @if($rel->sale_price !== null)
+                        <span class="ht-related-badge">-{{ round((($rel->price - $rel->sale_price) / $rel->price) * 100) }}%</span>
+                    @endif
+                </div>
+                <div class="ht-related-info">
+                    <span class="ht-related-brand">{{ $rel->brand }}</span>
+                    <strong class="ht-related-name">{{ $rel->name }}</strong>
+                    <div class="ht-related-price">
+                        <span class="ht-related-current">{{ number_format((float)($rel->sale_price ?? $rel->price), 0, ',', '.') }}₫</span>
+                        @if($rel->sale_price !== null)
+                            <del class="ht-related-old">{{ number_format((float)$rel->price, 0, ',', '.') }}₫</del>
+                        @endif
+                    </div>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- ── RECENTLY VIEWED PRODUCTS ── --}}
+    @if(isset($recentlyViewed) && $recentlyViewed->isNotEmpty())
+    <section class="store-container ht-related-section ht-recent-section" aria-labelledby="recent-title">
+        <div class="ht-section-heading">
+            <div>
+                <span class="ht-eyebrow">LỊCH SỬ DUYỆT CỦA BẠN</span>
+                <h2 id="recent-title">Sản phẩm bạn vừa xem gần đây</h2>
+            </div>
+        </div>
+        <div class="ht-related-grid">
+            @foreach($recentlyViewed as $recent)
+            <a href="{{ route('perfumes.show', $recent) }}" class="ht-related-card">
+                <div class="ht-related-img">
+                    <img src="{{ $recent->image_src ?: asset('images/perfume-default.jpg') }}" alt="{{ $recent->name }}" loading="lazy">
+                </div>
+                <div class="ht-related-info">
+                    <span class="ht-related-brand">{{ $recent->brand }}</span>
+                    <strong class="ht-related-name">{{ $recent->name }}</strong>
+                    <div class="ht-related-price">
+                        <span class="ht-related-current">{{ number_format((float)($recent->sale_price ?? $recent->price), 0, ',', '.') }}₫</span>
+                    </div>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- MODAL 1: THÊM VÀO TỦ NƯỚC HOA CÁ NHÂN --}}
+    <div id="htWardrobeModal" class="ht-popup-backdrop" hidden>
+        <div class="ht-popup-modal">
+            <button type="button" class="ht-popup-close-x" onclick="document.getElementById('htWardrobeModal').hidden=true">✕</button>
+            <div class="modal-icon">💎</div>
+            <h3>Lưu Vào Tủ Nước Hoa Cá Nhân</h3>
+            <p>Chọn dịp bạn cảm thấy phù hợp nhất để dùng mùi hương <strong>{{ $perfume->name }}</strong>:</p>
+            @auth
+            <form action="{{ route('store.wardrobe.add') }}" method="POST">
+                @csrf
+                <input type="hidden" name="perfume_id" value="{{ $perfume->id }}">
+                <div class="occasion-select-grid">
+                    <label class="occ-radio"><input type="radio" name="occasion" value="work" checked> <span>💼 Đi làm & Công sở</span></label>
+                    <label class="occ-radio"><input type="radio" name="occasion" value="date"> <span>🥂 Hẹn hò & Lãng mạn</span></label>
+                    <label class="occ-radio"><input type="radio" name="occasion" value="party"> <span>👑 Đi tiệc & Dạ hội</span></label>
+                    <label class="occ-radio"><input type="radio" name="occasion" value="casual"> <span>🌿 Thường ngày & Dạo phố</span></label>
+                </div>
+                <div style="margin-top: 14px;">
+                    <label style="font-size: 13px; color: #55444e; display: block; margin-bottom: 6px;">Ghi chú cảm xúc của bạn (không bắt buộc):</label>
+                    <input type="text" name="notes" class="form-control" placeholder="VD: Mùi này tuyệt nhất vào ngày mưa hoặc trời lạnh..." style="width: 100%; border: 1px solid #f3d4e0; border-radius: 8px; padding: 10px;">
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="ht-button ht-button-primary" style="flex: 1;">Lưu Vào Tủ Hương</button>
+                    <a href="{{ route('store.wardrobe') }}" class="ht-button ht-button-outline">Xem Tủ Hương</a>
+                </div>
+            </form>
+            @else
+            <p><a href="{{ route('login') }}" class="ht-button ht-button-primary">Đăng Nhập Để Lưu Tủ Nước Hoa</a></p>
+            @endauth
+        </div>
+    </div>
+
+    {{-- MODAL 2: GỬI TẶNG BẠN BÈ --}}
+    <div id="htGiftModal" class="ht-popup-backdrop" hidden>
+        <div class="ht-popup-modal">
+            <button type="button" class="ht-popup-close-x" onclick="document.getElementById('htGiftModal').hidden=true">✕</button>
+            <div class="modal-icon">🎁</div>
+            <h3>Gửi Tặng Món Quà Này Cho Bạn Bè</h3>
+            <p>Tạo link thiệp điện tử kèm lời nhắn gửi trao để gửi qua Zalo, Messenger hoặc SMS:</p>
+            <div class="gift-form-fields">
+                <label>Tên của bạn (Người gửi):</label>
+                <input type="text" id="giftFromInput" value="{{ Auth::user()->name ?? 'Người bạn thân' }}" class="form-input">
+                <label>Tên người nhận:</label>
+                <input type="text" id="giftToInput" placeholder="VD: Mai Lan" class="form-input">
+                <label>Lời chúc / Nhắn nhủ:</label>
+                <textarea id="giftMsgInput" rows="3" class="form-input">Chúc bạn luôn ngát hương thơm và rạng rỡ mỗi ngày nhé!</textarea>
+                <div style="margin-top: 14px;">
+                    <button type="button" id="generateGiftLinkBtn" class="ht-button ht-button-primary" style="width: 100%;">Tạo & Sao Chép Link Tặng Quà 🔗</button>
+                </div>
+                <div id="giftLinkOutputWrap" style="display: none; margin-top: 12px; background: #fff0f5; padding: 10px; border-radius: 8px; font-size: 12px;">
+                    <strong style="color: #c2476a;">✓ Đã sao chép link!</strong>
+                    <p style="word-break: break-all; margin: 4px 0 0;" id="giftLinkOutputText"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let currentBasePrice = {{ $priceFull }};
@@ -525,10 +728,273 @@
 
 
             calculateTotalPrice();
+
+            // Modal Tủ Nước Hoa
+            const wBtn = document.getElementById('openWardrobeModalBtn');
+            const wModal = document.getElementById('htWardrobeModal');
+            if (wBtn && wModal) {
+                wBtn.addEventListener('click', () => { wModal.hidden = false; });
+                wModal.addEventListener('click', (e) => { if (e.target === wModal) wModal.hidden = true; });
+            }
+
+            // Modal Gửi Tặng Bạn Bè
+            const gBtn = document.getElementById('openGiftModalBtn');
+            const gModal = document.getElementById('htGiftModal');
+            const genGiftBtn = document.getElementById('generateGiftLinkBtn');
+            const giftOutWrap = document.getElementById('giftLinkOutputWrap');
+            const giftOutText = document.getElementById('giftLinkOutputText');
+
+            if (gBtn && gModal) {
+                gBtn.addEventListener('click', () => { gModal.hidden = false; });
+                gModal.addEventListener('click', (e) => { if (e.target === gModal) gModal.hidden = true; });
+            }
+
+            if (genGiftBtn) {
+                genGiftBtn.addEventListener('click', function () {
+                    const from = encodeURIComponent(document.getElementById('giftFromInput').value || 'Bạn thân');
+                    const to = encodeURIComponent(document.getElementById('giftToInput').value || 'Người nhận');
+                    const msg = encodeURIComponent(document.getElementById('giftMsgInput').value || '');
+                    const baseUrl = "{{ route('store.gift-share') }}";
+                    const fullUrl = `${baseUrl}?id={{ $perfume->id }}&from=${from}&to=${to}&msg=${msg}`;
+
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(fullUrl);
+                    }
+                    giftOutText.textContent = fullUrl;
+                    giftOutWrap.style.display = 'block';
+                    genGiftBtn.textContent = '✓ Đã Sao Chép Link Tặng Quà!';
+                    setTimeout(() => { genGiftBtn.textContent = 'Tạo & Sao Chép Link Tặng Quà 🔗'; }, 3000);
+                });
+            }
         });
     </script>
 
     <style>
+        .ht-utility-btn {
+            background: none;
+            border: 1px solid #fce7f3;
+            color: #be185d;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ht-utility-btn:hover { background: #fdf2f8; border-color: #f472b6; }
+
+        /* Bundle Section */
+        .ht-bundle-section { margin: 40px auto; }
+        .ht-bundle-card {
+            background: linear-gradient(135deg, #fff5f8, #fdf2f8);
+            border: 2px solid #fbcfe8;
+            border-radius: 24px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(194, 71, 106, 0.08);
+        }
+        .bundle-badge {
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            background: #be185d;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+        }
+        .bundle-content {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+        @media (max-width: 768px) { .bundle-content { grid-template-columns: 1fr; } }
+        .bundle-items-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #fff;
+            border-radius: 18px;
+            padding: 20px 12px;
+            border: 1px dashed #f472b6;
+        }
+        .bundle-item { text-align: center; }
+        .bundle-item img { height: 90px; object-fit: contain; }
+        .bundle-item span { display: block; font-size: 11px; color: #715865; margin-top: 4px; }
+        .bundle-plus { font-size: 20px; font-weight: 700; color: #be185d; }
+        .vial-thumb, .box-thumb { font-size: 36px; height: 90px; display: flex; align-items: center; justify-content: center; }
+        .bundle-info h3 { font: 600 20px Georgia, serif; color: #2b1f26; margin: 0 0 6px; }
+        .bundle-info p { font-size: 13.5px; color: #664d5a; line-height: 1.5; margin: 0 0 16px; }
+        .bundle-pricing { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
+        .bundle-price { font-size: 24px; font-weight: 700; color: #be185d; }
+        .bundle-old { font-size: 14px; color: #a8949f; }
+        .bundle-save { background: #fee2e2; color: #991b1b; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+
+        /* Tag Pill Video */
+        .tag-pill-video {
+            background: linear-gradient(135deg, #ffe4e6, #fce7f3) !important;
+            color: #db2777 !important;
+            font-weight: 800 !important;
+            border: 1px solid rgba(219, 39, 119, 0.35) !important;
+            box-shadow: 0 3px 12px rgba(219, 39, 119, 0.18) !important;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px !important;
+            border-radius: 20px;
+            transition: all .2s ease;
+        }
+        .tag-pill-video:hover {
+            background: linear-gradient(135deg, #f472b6, #db2777) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(219, 39, 119, 0.35) !important;
+        }
+
+        /* Video Review Shorts */
+        .ht-video-review-section {
+            margin: 44px auto;
+            padding: 30px 26px 34px;
+            background: linear-gradient(180deg, #fff7f9 0%, #ffffff 100%);
+            border-radius: 24px;
+            border: 1px solid #fce7f3;
+            box-shadow: 0 8px 30px rgba(232, 114, 138, 0.08);
+        }
+        .ht-video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 22px; }
+        .ht-video-card {
+            background: #ffffff;
+            border: 1px solid #fce7f3;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+            padding: 14px;
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+            cursor: pointer;
+        }
+        .ht-video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 32px rgba(219, 39, 119, 0.12);
+            border-color: #f472b6;
+        }
+        .video-preview-wrap {
+            position: relative;
+            background: #faf4f7;
+            border-radius: 14px;
+            overflow: hidden;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .video-preview-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+        .ht-video-card:hover .video-preview-wrap img { transform: scale(1.05); }
+        .video-play-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.25s;
+        }
+        .ht-video-card:hover .video-play-overlay {
+            background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%);
+        }
+        .play-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e8728a, #db2777);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 18px rgba(219, 39, 119, 0.5);
+            transition: transform .2s ease;
+        }
+        .ht-video-card:hover .play-icon {
+            transform: scale(1.15);
+        }
+        .video-duration {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .ht-video-card h4 { font: 700 15px Georgia, serif; color: #1e293b; margin: 0 0 6px; line-height: 1.4; }
+        .ht-video-card:hover h4 { color: #db2777; }
+        .ht-video-card p { font-size: 12.5px; color: #64748b; margin: 0; line-height: 1.5; }
+
+        /* Modals */
+        .ht-popup-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            background: rgba(20, 10, 15, 0.65);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .ht-popup-backdrop[hidden] { display: none !important; }
+        .ht-popup-modal {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 460px;
+            width: 100%;
+            padding: 30px 24px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            border: 2px solid #fbcfe8;
+            text-align: center;
+        }
+        .ht-popup-close-x {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: #fdf2f8;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #be185d;
+        }
+        .modal-icon { font-size: 36px; margin-bottom: 8px; }
+        .ht-popup-modal h3 { font: 600 20px Georgia, serif; color: #2b1f26; margin: 0 0 6px; }
+        .ht-popup-modal p { font-size: 13.5px; color: #6d5b64; margin: 0 0 18px; line-height: 1.5; }
+        .occasion-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; }
+        .occ-radio {
+            border: 1px solid #f3d4e0;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 12.5px;
+            color: #4a3540;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fffafa;
+        }
+        .occ-radio input:checked + span { font-weight: 700; color: #be185d; }
+        .gift-form-fields { text-align: left; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #4a3540; }
+        .form-input { width: 100%; border: 1px solid #f3d4e0; border-radius: 8px; padding: 9px 12px; font-size: 13.5px; }
+
         .volume-card-stock {
             font-size: 11.5px;
             font-weight: 600;
@@ -546,12 +1012,8 @@
             border-top-color: #cbd5e1;
             font-weight: 700;
         }
-        .volume-card-stock.stock-low {
-            color: #d97706;
-        }
-        .volume-card-stock.stock-out {
-            color: #dc2626;
-        }
+        .volume-card-stock.stock-low { color: #d97706; }
+        .volume-card-stock.stock-out { color: #dc2626; }
         .stock-dot {
             width: 7px;
             height: 7px;
@@ -565,11 +1027,7 @@
             background-color: #f59e0b;
             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
         }
-        .luxury-stock-status.out-of-stock {
-            color: #dc2626;
-        }
-        .luxury-stock-status svg {
-            flex-shrink: 0;
-        }
+        .luxury-stock-status.out-of-stock { color: #dc2626; }
+        .luxury-stock-status svg { flex-shrink: 0; }
     </style>
 @endsection

@@ -1,163 +1,750 @@
-{{-- LAB 7: CHAT POPUP COMPONENT (PDF Hướng dẫn Lab 7) --}}
+{{-- LAB 7: LUXURY BOUTIQUE CHAT POPUP (Ha Thu Perfume Studio) --}}
 @auth
-<div id="chat-box">
-    <button id="chat-toggle" class="btn btn-primary rounded-circle shadow" type="button" aria-label="Tư vấn cùng Ha Thu">@include('partials.icon', ['name' => 'chat', 'size' => 22])</button>
-    <div id="chat-popup" class="card shadow-lg" style="display:none; border-radius: 12px;">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #db2777, #be185d) !important; border:none; padding:12px 16px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 16px;">🌸</span>
-                <strong style="font-size: 14px; letter-spacing: 0.3px;">Hỗ trợ khách hàng</strong>
-            </div>
-            <button id="chat-close" class="btn btn-sm btn-light" type="button" style="padding: 2px 8px; font-weight: bold; border-radius: 6px; font-size: 12px; line-height: 1;">✕</button>
-        </div>
-        <div id="chat-messages" class="card-body">
-            <div class="text-center text-muted"><small>Đang tải lịch sử...</small></div>
-        </div>
-        <div class="card-footer bg-white" style="border-top: 1px solid #f3f4f6; padding: 10px 14px;">
-            <div class="input-group" style="display: flex; gap: 6px;">
-                <input type="text" id="chat-input" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off" style="border-radius: 8px; border: 1px solid #e5e7eb; font-size: 13.5px; padding: 8px 12px; outline: none; flex: 1;">
-                <div class="input-group-append">
-                    <button id="send-btn" class="btn btn-success" type="button" style="background: #db2777; border-color: #db2777; border-radius: 8px; font-weight: 600; padding: 8px 16px; font-size: 13.5px;">Gửi</button>
+<div id="chat-box" class="boutique-chat-wrapper">
+    {{-- Nút bấm mở chat nổi --}}
+    <button id="chat-toggle" class="chat-floating-btn" type="button" aria-label="Tư vấn trực tuyến cùng Ha Thu Perfume">
+        <span class="chat-btn-pulse"></span>
+        <span class="chat-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+        </span>
+        <span class="chat-online-dot" title="Trực tuyến"></span>
+        <span class="chat-btn-label">Tư vấn</span>
+    </button>
+
+    {{-- Khung cửa sổ chat --}}
+    <div id="chat-popup" class="chat-modal-window" style="display:none;" role="dialog" aria-labelledby="chat-header-title">
+        {{-- Header cửa sổ --}}
+        <div class="chat-window-header">
+            <div class="chat-header-left">
+                <div class="chat-avatar-frame">
+                    <span class="chat-avatar-text">HT</span>
+                    <span class="avatar-status-pip"></span>
                 </div>
+                <div class="chat-header-meta">
+                    <div id="chat-header-title" class="chat-title">Hạ Thu Perfume Studio</div>
+                    <div class="chat-subtitle">
+                        <span class="live-indicator"></span>
+                        <span>Trực tuyến · Sẵn sàng tư vấn</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button id="chat-close" class="chat-close-btn" type="button" aria-label="Đóng cửa sổ chat" title="Đóng">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Vùng hiển thị tin nhắn --}}
+        <div id="chat-messages" class="chat-messages-scroll" tabindex="0">
+            <div class="chat-welcome-card">
+                <div class="welcome-flower">🌸</div>
+                <div class="welcome-heading">Chào mừng bạn đến với Hạ Thu Perfume!</div>
+                <div class="welcome-text">Bạn đang cần tư vấn mùi hương, kiểm tra đơn hàng hay tìm mẫu thử? Hãy nhắn ngay cho chuyên viên nhé!</div>
+                <div class="quick-chips-group">
+                    <button type="button" class="quick-chip-btn" data-text="Shop tư vấn giúp mình mùi hương nữ nhẹ nhàng, đi làm hàng ngày với ạ! 🌸">
+                        🌸 Tìm mùi thanh lịch
+                    </button>
+                    <button type="button" class="quick-chip-btn" data-text="Shop kiểm tra tiến độ đơn hàng gần nhất giúp mình nhé! 📦">
+                        📦 Kiểm tra đơn hàng
+                    </button>
+                    <button type="button" class="quick-chip-btn" data-text="Shop có hỗ trợ khắc tên và gói quà tặng không ạ? 🎁">
+                        🎁 Dịch vụ quà tặng
+                    </button>
+                </div>
+            </div>
+            <div id="chat-stream-loading" class="text-center py-2 text-muted" style="display:none;">
+                <small class="chat-loading-text">Đang tải cuộc trò chuyện...</small>
+            </div>
+        </div>
+
+        {{-- Footer nhập tin nhắn --}}
+        <div class="chat-window-footer">
+            <form id="chat-input-form" onsubmit="return false;" class="chat-form-row">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chat-input" class="chat-text-input" placeholder="Nhập tin nhắn..." autocomplete="off" maxlength="1000">
+                </div>
+                <button id="send-btn" class="chat-send-action-btn" type="button" aria-label="Gửi tin nhắn" title="Gửi (Enter)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+            <div class="chat-footer-note">
+                <span>Ha Thu Boutique Concierge</span>
+                <span class="note-dot">·</span>
+                <span>Bảo mật 100%</span>
             </div>
         </div>
     </div>
 </div>
 @else
-<div id="chat-box">
-    <a href="{{ route('login') }}" id="chat-toggle" class="btn btn-primary rounded-circle shadow" title="Đăng nhập để chat với bộ phận hỗ trợ" style="text-decoration: none;">💬 Chat</a>
+<div id="chat-box" class="boutique-chat-wrapper">
+    <a href="{{ route('login') }}" id="chat-toggle" class="chat-floating-btn guest-btn" title="Đăng nhập để chat trực tiếp với chuyên gia mùi hương Ha Thu">
+        <span class="chat-btn-pulse"></span>
+        <span class="chat-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+        </span>
+        <span class="chat-online-dot"></span>
+        <span class="chat-btn-label">Tư vấn</span>
+    </a>
 </div>
 @endauth
 
 <style>
-/* ── LAB 7: CHAT BOX POPUP STYLES ── */
-#chat-box {
+/* ── LUXURY BOUTIQUE CHAT POPUP STYLES ── */
+.boutique-chat-wrapper {
     position: fixed;
     bottom: 24px;
     right: 24px;
     z-index: 999999;
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-#chat-toggle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50% !important;
-    background: linear-gradient(135deg, #db2777, #be185d) !important;
-    border: none !important;
+
+/* 1. Nút nổi Floating Button */
+.chat-floating-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px 0 14px;
+    height: 52px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #e11d48 0%, #db2777 55%, #be185d 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
     color: #ffffff !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    box-shadow: 0 6px 20px rgba(219, 39, 119, 0.45) !important;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s !important;
+    text-decoration: none !important;
+    box-shadow: 0 8px 24px rgba(219, 39, 119, 0.42), 0 2px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    outline: none;
 }
-#chat-toggle:hover {
-    transform: translateY(-3px) scale(1.05) !important;
-    box-shadow: 0 10px 25px rgba(219, 39, 119, 0.55) !important;
+.chat-floating-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(219, 39, 119, 0.52), 0 4px 10px rgba(0, 0, 0, 0.12);
+    color: #ffffff !important;
 }
-#chat-popup {
-    width: 340px;
-    height: 450px;
+.chat-floating-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+.chat-btn-pulse {
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    border: 2px solid rgba(244, 114, 182, 0.6);
+    animation: chatPulse 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    pointer-events: none;
+}
+@keyframes chatPulse {
+    0% { transform: scale(0.96); opacity: 0.9; }
+    50% { transform: scale(1.08); opacity: 0; }
+    100% { transform: scale(0.96); opacity: 0; }
+}
+.chat-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+.chat-btn-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+.chat-online-dot {
+    position: absolute;
+    top: 6px;
+    left: 32px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #10b981;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+}
+
+/* 2. Cửa sổ chat Window */
+.chat-modal-window {
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    height: 540px;
+    max-height: calc(100vh - 100px);
     background: #ffffff;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid #fce7f3;
-}
-#chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(157, 23, 77, 0.2), 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(244, 114, 182, 0.35);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    background: #faf8f9;
+    overflow: hidden;
+    animation: chatWindowPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.message-row {
-    padding: 8px 13px;
-    border-radius: 12px;
-    font-size: 0.88rem;
-    line-height: 1.4;
-    max-width: 82%;
-    word-break: break-word;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+@keyframes chatWindowPop {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
-.user-msg {
-    align-self: flex-end;
-    background: #fce7f3;
-    color: #9d174d;
-    border-bottom-right-radius: 3px;
-    text-align: right;
+
+/* 3. Header */
+.chat-window-header {
+    background: linear-gradient(135deg, #be185d 0%, #db2777 55%, #e11d48 100%);
+    color: #ffffff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(190, 24, 93, 0.25);
+    position: relative;
+    z-index: 2;
 }
-.admin-msg {
-    align-self: flex-start;
+.chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.chat-avatar-frame {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+}
+.chat-avatar-text {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+.avatar-status-pip {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #10b981;
+    border: 2px solid #be185d;
+}
+.chat-header-meta {
+    display: flex;
+    flex-direction: column;
+}
+.chat-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    line-height: 1.25;
+}
+.chat-subtitle {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.88);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+}
+.live-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 6px #34d399;
+    display: inline-block;
+}
+.chat-close-btn {
+    background: rgba(255, 255, 255, 0.18);
+    border: none;
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.chat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.32);
+    transform: rotate(90deg);
+}
+
+/* 4. Vùng tin nhắn Chat Messages */
+.chat-messages-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    background: #faf7f9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+}
+.chat-messages-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+.chat-messages-scroll::-webkit-scrollbar-thumb {
+    background: #f4a7b6;
+    border-radius: 4px;
+}
+
+/* Welcome Card */
+.chat-welcome-card {
     background: #ffffff;
-    color: #1f2937;
-    border-bottom-left-radius: 3px;
-    border: 1px solid #f3f4f6;
+    border: 1px solid #fce7f3;
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(225, 29, 72, 0.04);
+    margin-bottom: 4px;
+}
+.welcome-flower {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+.welcome-heading {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #be185d;
+    margin-bottom: 4px;
+}
+.welcome-text {
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.45;
+    margin-bottom: 12px;
+}
+.quick-chips-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.quick-chip-btn {
+    background: #fff5f8;
+    border: 1px dashed #f472b6;
+    color: #9d174d;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 20px;
     text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+.quick-chip-btn:hover {
+    background: #fce7f3;
+    border-color: #db2777;
+    transform: translateX(3px);
+}
+
+/* Date separator */
+.chat-date-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0;
+}
+.chat-date-separator span {
+    background: #eedde5;
+    color: #6b4b57;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+
+/* Message Bubble Structures */
+.chat-bubble-row {
+    display: flex;
+    gap: 8px;
+    max-width: 86%;
+    animation: fadeInBubble 0.2s ease;
+}
+@keyframes fadeInBubble {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tin nhắn của Khách (Me - Gửi đi) */
+.user-bubble-row {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+.user-bubble {
+    background: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
+    color: #ffffff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 10px 14px 7px 14px;
+    box-shadow: 0 3px 12px rgba(219, 39, 119, 0.24);
+    position: relative;
+    word-break: break-word;
+}
+.user-bubble .bubble-text {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: #ffffff;
+}
+.user-bubble .bubble-time {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.82);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tin nhắn của Admin / Tư vấn viên (Đến) */
+.admin-bubble-row {
+    align-self: flex-start;
+}
+.admin-mini-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fce7f3;
+    border: 1px solid #f472b6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.admin-bubble {
+    background: #ffffff;
+    border: 1px solid #f3e8ee;
+    border-radius: 16px 16px 16px 4px;
+    padding: 9px 14px 7px 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    word-break: break-word;
+}
+.admin-bubble .bubble-author {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #be185d;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.admin-bubble .bubble-text {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: #1f2937;
+}
+.admin-bubble .bubble-time {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 0.68rem;
+    color: #9ca3af;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 5. Footer & Form nhập liệu */
+.chat-window-footer {
+    background: #ffffff;
+    border-top: 1px solid #f3e8ee;
+    padding: 10px 14px 8px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.02);
+}
+.chat-form-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.chat-input-wrapper {
+    flex: 1;
+    position: relative;
+}
+.chat-text-input {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 24px;
+    border: 1.5px solid #f3e8ee;
+    background: #faf8f9;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    color: #1f2937;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.chat-text-input:focus {
+    background: #ffffff;
+    border-color: #db2777;
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.12);
+}
+.chat-text-input::placeholder {
+    color: #9ca3af;
+}
+.chat-send-action-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
+    border: none;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.35);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+}
+.chat-send-action-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(219, 39, 119, 0.45);
+}
+.chat-send-action-btn:active {
+    transform: scale(0.94);
+}
+.chat-send-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+.chat-footer-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: #9ca3af;
+    margin-top: 6px;
+    letter-spacing: 0.2px;
+}
+.note-dot {
+    color: #d1d5db;
+}
+
+@media (max-width: 480px) {
+    .boutique-chat-wrapper {
+        bottom: 16px;
+        right: 16px;
+    }
+    .chat-modal-window {
+        width: calc(100vw - 32px);
+        height: calc(100vh - 120px);
+        bottom: 0;
+    }
 }
 </style>
 
 @auth
 <script>
 (function () {
-    function initUserChat() {
+    function initBoutiqueChat() {
         const toggleBtn = document.getElementById("chat-toggle");
         const chatPopup = document.getElementById("chat-popup");
         const closeBtn = document.getElementById("chat-close");
         const sendBtn = document.getElementById("send-btn");
         const input = document.getElementById("chat-input");
         const chatBox = document.getElementById("chat-messages");
+        const quickChips = document.querySelectorAll(".quick-chip-btn");
 
         if (!toggleBtn || !chatPopup) return;
 
-        // --- MỞ / ĐÓNG CHAT ---
+        let lastMessageCount = 0;
+        let isSending = false;
+
+        // ── Helper: Format ngày giờ tiếng Việt ──
+        function formatChatTime(dateStr) {
+            if (!dateStr) return '';
+            try {
+                let s = String(dateStr).trim();
+                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(s)) {
+                    s = s.replace(' ', 'T');
+                }
+                const d = new Date(s);
+                if (isNaN(d.getTime())) return '';
+
+                const now = new Date();
+                const isToday = (d.toDateString() === now.toDateString());
+
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                const timePart = `${hours}:${minutes}`;
+
+                if (isToday) {
+                    return timePart;
+                }
+
+                const yesterday = new Date(now);
+                yesterday.setDate(now.getDate() - 1);
+                if (d.toDateString() === yesterday.toDateString()) {
+                    return `Hôm qua, ${timePart}`;
+                }
+
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                return `${day}/${month} ${timePart}`;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        // ── MỞ & ĐÓNG CHAT ──
         toggleBtn.onclick = () => {
             chatPopup.style.display = "flex";
             toggleBtn.style.display = "none";
-            loadMessages();
+            loadMessages(true);
             if (input) setTimeout(() => input.focus(), 150);
         };
 
         if (closeBtn) {
             closeBtn.onclick = () => {
                 chatPopup.style.display = "none";
-                toggleBtn.style.display = "flex";
+                toggleBtn.style.display = "inline-flex";
             };
         }
 
-        // --- LOAD TIN NHẮN ---
-        function loadMessages() {
+        // Gợi ý câu hỏi nhanh (Quick Chips)
+        quickChips.forEach(chip => {
+            chip.addEventListener("click", function () {
+                const text = this.getAttribute("data-text");
+                if (text && input) {
+                    input.value = text;
+                    sendMessage();
+                }
+            });
+        });
+
+        // ── TẢI DANH SÁCH TIN NHẮN ──
+        function loadMessages(forceScroll = false) {
             fetch("{{ route('user.chat.messages') }}")
                 .then(res => res.json())
                 .then(messages => {
-                    let html = "";
-                    if (!messages || messages.length === 0) {
-                        html = "<div class='text-center text-muted' style='margin:auto; color:#9ca3af;'><small>🌸 Bắt đầu cuộc trò chuyện với tư vấn viên Ha Thu Perfume</small></div>";
-                    } else {
+                    if (!messages) return;
+
+                    const isAtBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < 60;
+
+                    // Giữ lại thẻ welcome card
+                    const welcomeCard = chatBox.querySelector(".chat-welcome-card");
+                    let html = welcomeCard ? welcomeCard.outerHTML : "";
+
+                    if (messages.length > 0) {
+                        let lastDateStr = null;
+
                         messages.forEach(msg => {
-                            const isMe = msg.sender_id == "{{ Auth::id() }}";
-                            html += `
-                                <div class="message-row ${isMe ? 'user-msg' : 'admin-msg'}">
-                                    <strong>${isMe ? 'Bạn' : 'Admin'}:</strong> ${escapeHtml(msg.content)}
-                                </div>
-                            `;
+                            const isMe = (msg.sender_id == "{{ Auth::id() }}");
+                            const timeFormatted = formatChatTime(msg.created_at);
+
+                            // Kiểm tra hiển thị divider ngày
+                            if (msg.created_at) {
+                                try {
+                                    let s = String(msg.created_at).trim().replace(' ', 'T');
+                                    const d = new Date(s);
+                                    if (!isNaN(d.getTime())) {
+                                        const dateKey = d.toDateString();
+                                        if (dateKey !== lastDateStr) {
+                                            const now = new Date();
+                                            let label = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                                            if (dateKey === now.toDateString()) {
+                                                label = "Hôm nay";
+                                            } else {
+                                                const yest = new Date(now);
+                                                yest.setDate(now.getDate() - 1);
+                                                if (dateKey === yest.toDateString()) label = "Hôm qua";
+                                            }
+                                            html += `<div class="chat-date-separator"><span>${label}</span></div>`;
+                                            lastDateStr = dateKey;
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+
+                            if (isMe) {
+                                // Khách hàng (User) gửi
+                                html += `
+                                    <div class="chat-bubble-row user-bubble-row">
+                                        <div class="user-bubble">
+                                            <div class="bubble-text">${escapeHtml(msg.content)}</div>
+                                            <div class="bubble-time">
+                                                <span>${timeFormatted}</span>
+                                                <span style="font-size:0.65rem;">✓</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                // Admin / Tư vấn viên phản hồi
+                                html += `
+                                    <div class="chat-bubble-row admin-bubble-row">
+                                        <div class="admin-mini-avatar" title="Tư vấn viên Hạ Thu">🌸</div>
+                                        <div class="admin-bubble">
+                                            <div class="bubble-author">
+                                                <span>Tư vấn viên Hạ Thu</span>
+                                            </div>
+                                            <div class="bubble-text">${escapeHtml(msg.content)}</div>
+                                            <div class="bubble-time">${timeFormatted}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
                         });
                     }
+
                     chatBox.innerHTML = html;
-                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    // Re-bind quick chips sau khi render lại nếu chưa gửi
+                    chatBox.querySelectorAll(".quick-chip-btn").forEach(chip => {
+                        chip.addEventListener("click", function () {
+                            const text = this.getAttribute("data-text");
+                            if (text && input) {
+                                input.value = text;
+                                sendMessage();
+                            }
+                        });
+                    });
+
+                    if (forceScroll || isAtBottom || messages.length !== lastMessageCount) {
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                    lastMessageCount = messages.length;
                 })
                 .catch(err => console.error("Lỗi tải tin nhắn:", err));
         }
 
-        // --- GỬI TIN NHẮN ---
+        // ── GỬI TIN NHẮN ──
         function sendMessage() {
+            if (isSending) return;
             let message = input ? input.value.trim() : "";
             if (message === "") return;
 
+            isSending = true;
             if (input) input.disabled = true;
             if (sendBtn) sendBtn.disabled = true;
 
@@ -181,42 +768,42 @@
                     input.focus();
                 }
                 if (sendBtn) sendBtn.disabled = false;
-                loadMessages();
+                isSending = false;
+                loadMessages(true);
             })
             .catch(err => {
-                console.error("Lỗi gửi tin:", err);
-                if (input) input.disabled = false;
+                console.error("Lỗi gửi tin nhắn:", err);
+                if (input) {
+                    input.disabled = false;
+                    input.focus();
+                }
                 if (sendBtn) sendBtn.disabled = false;
+                isSending = false;
             });
-        }
-
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
         }
 
         if (sendBtn) sendBtn.onclick = sendMessage;
         if (input) {
-            input.addEventListener("keypress", function (e) {
-                if (e.key === "Enter") {
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
                     sendMessage();
                 }
             });
         }
 
-        // --- AUTO REFRESH (3 giây/lần) ---
+        // ── Polling cập nhật mỗi 3 giây ──
         setInterval(() => {
             if (chatPopup && chatPopup.style.display !== "none") {
-                loadMessages();
+                loadMessages(false);
             }
         }, 3000);
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initUserChat);
+        document.addEventListener("DOMContentLoaded", initBoutiqueChat);
     } else {
-        initUserChat();
+        initBoutiqueChat();
     }
 })();
 </script>

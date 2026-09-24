@@ -64,8 +64,12 @@ class CartController extends Controller
                 }
             }
 
-            // Generate friendly label
-            if ($volumeMl === 10) {
+            $isDiscovery = (bool) ($itemData['is_discovery_box'] ?? false);
+            $customTitle = $itemData['title'] ?? null;
+            if ($isDiscovery) {
+                $volumeLabel = 'Hộp Thử Mùi Discovery Box';
+                $engraveText = 'Các mùi đã chọn: ' . ($itemData['sample_names'] ?? '');
+            } elseif ($volumeMl === 10) {
                 $volumeLabel = '10ml (Chiết Travel Spray)';
             } elseif ($volumeMl === 50) {
                 $volumeLabel = '50ml (Chai Vừa Phải)';
@@ -79,6 +83,8 @@ class CartController extends Controller
                 'quantity' => $quantity,
                 'volume_ml' => $volumeMl,
                 'volume_label' => $volumeLabel,
+                'is_discovery_box' => $isDiscovery,
+                'custom_title' => $customTitle,
                 'has_gift' => $hasGift,
                 'has_engrave' => $hasEngrave,
                 'engrave_text' => $engraveText,
@@ -245,6 +251,10 @@ class CartController extends Controller
             'customer_name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'regex:/^0[0-9]{9}$/'],
             'address' => ['required', 'string', 'max:500'],
+            'gift_wrap' => ['nullable', 'string', 'max:100'],
+            'gift_card' => ['nullable', 'string', 'max:100'],
+            'gift_message' => ['nullable', 'string', 'max:1000'],
+            'gift_delivery_date' => ['nullable', 'date'],
         ], [
             'customer_name.required' => 'Vui lòng nhập họ và tên.',
             'phone.required' => 'Vui lòng nhập số điện thoại.',
@@ -338,6 +348,10 @@ class CartController extends Controller
                 'address' => $validated['address'],
                 'total_price' => $totalPrice,
                 'status' => 'pending',
+                'gift_wrap' => $validated['gift_wrap'] ?? null,
+                'gift_card' => $validated['gift_card'] ?? null,
+                'gift_message' => $validated['gift_message'] ?? null,
+                'gift_delivery_date' => $validated['gift_delivery_date'] ?? null,
             ]);
 
             // Save order items & decrement stock
@@ -369,5 +383,45 @@ class CartController extends Controller
             'success',
             'Đặt hàng thành công! Ha Thu Perfume sẽ liên hệ '.$validated['customer_name'].' qua số '.$validated['phone'].'.'
         );
+    }
+
+    public function addDiscoveryBox(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'size' => ['required', 'in:3,5'],
+            'perfume_ids' => ['required', 'array'],
+            'perfume_ids.*' => ['required', 'exists:perfumes,id'],
+        ]);
+
+        $size = (int) $validated['size'];
+        $selectedIds = array_slice($validated['perfume_ids'], 0, $size);
+        if (count($selectedIds) < 3) {
+            return back()->withErrors(['discovery' => 'Vui lòng chọn ít nhất 3 mẫu chiết cho Hộp thử mùi.']);
+        }
+
+        $perfumes = Perfume::whereIn('id', $selectedIds)->get();
+        $price = $size === 5 ? 299000 : 199000;
+        $names = $perfumes->pluck('name')->join(', ');
+
+        $itemKey = 'discovery_box_' . \Illuminate\Support\Str::random(8);
+        $cart = $request->session()->get('cart', []);
+
+        $cart[$itemKey] = [
+            'item_key' => $itemKey,
+            'is_discovery_box' => true,
+            'title' => "Hộp Thử Mùi Discovery Box ({$size} Mẫu Chiết)",
+            'sample_names' => $names,
+            'sample_ids' => $selectedIds,
+            'perfume_id' => $perfumes->first()->id,
+            'quantity' => 1,
+            'volume_ml' => 5,
+            'unit_price' => $price,
+            'has_gift' => true,
+            'engrave_text' => "Discovery Box ({$size} mẫu: {$names})",
+        ];
+
+        $request->session()->put('cart', $cart);
+
+        return redirect()->route('cart.index')->with('success', "Đã thêm Hộp Thử Mùi Discovery Box ({$size} mẫu) vào giỏ hàng!");
     }
 }

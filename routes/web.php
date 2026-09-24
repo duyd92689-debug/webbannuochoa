@@ -5,8 +5,13 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PerfumeController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StoreExperienceController;
+use App\Http\Controllers\JournalController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\ArticleController;
+use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -18,6 +23,19 @@ use Illuminate\Http\Request;
 // TRANG CHỦ & CỬA HÀNG - Giữ nguyên từ Lab 01 & 02
 // ============================================================
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/chon-huong', [StoreExperienceController::class, 'finder'])->name('store.finder');
+Route::get('/so-sanh', [StoreExperienceController::class, 'compare'])->name('store.compare');
+Route::get('/cam-nang', [JournalController::class, 'index'])->name('store.journal');
+Route::get('/cam-nang/{article:slug}', [JournalController::class, 'show'])->name('store.article');
+Route::get('/cau-hoi-thuong-gap', [StoreExperienceController::class, 'faq'])->name('store.faq');
+
+
+Route::get('/quiz', [StoreExperienceController::class, 'quiz'])->name('store.quiz');
+Route::get('/trac-nghiem-mui-huong', [StoreExperienceController::class, 'quiz'])->name('store.quiz.alias');
+Route::get('/hop-thu-mui', [StoreExperienceController::class, 'discoveryBox'])->name('store.discovery-box');
+Route::get('/mui-huong-hom-nay', [StoreExperienceController::class, 'scentOfTheDay'])->name('store.scent-of-the-day');
+Route::get('/tang-qua', [StoreExperienceController::class, 'giftShare'])->name('store.gift-share');
+Route::get('/tu-nuoc-hoa/chia-se/{user}', [StoreExperienceController::class, 'shareWardrobe'])->name('store.wardrobe.share');
 
 Route::resource('perfumes', PerfumeController::class);
 Route::resource('categories', CategoryController::class);
@@ -43,7 +61,16 @@ Route::get('/payment/momo/callback', [MomoController::class, 'callback'])->name(
 // GIỎ HÀNG & ĐẶT HÀNG - Yêu cầu đăng nhập (auth middleware)
 // ============================================================
 Route::middleware(['auth'])->group(function () {
+    Route::get('/thanh-vien', [StoreExperienceController::class, 'member'])->name('store.member');
+    Route::get('/yeu-thich', [StoreExperienceController::class, 'wishlist'])->name('store.wishlist');
+    Route::post('/yeu-thich/{perfume}', [StoreExperienceController::class, 'toggleWishlist'])->name('store.wishlist.toggle');
+    Route::post('/danh-gia/{perfume}', [StoreExperienceController::class, 'review'])->name('store.review');
+    Route::post('/bao-hang/{perfume}', [StoreExperienceController::class, 'stockAlert'])->name('store.stock-alert');
+    Route::get('/tu-nuoc-hoa', [StoreExperienceController::class, 'wardrobe'])->name('store.wardrobe');
+    Route::post('/tu-nuoc-hoa', [StoreExperienceController::class, 'addToWardrobe'])->name('store.wardrobe.add');
+    Route::delete('/tu-nuoc-hoa/{id}', [StoreExperienceController::class, 'removeFromWardrobe'])->name('store.wardrobe.remove');
     Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/gio-hang/hop-thu-mui', [CartController::class, 'addDiscoveryBox'])->name('cart.add-discovery-box');
     Route::post('/gio-hang/{perfume}', [CartController::class, 'add'])->name('cart.add');
     Route::patch('/gio-hang/{itemKey}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/gio-hang/{itemKey}', [CartController::class, 'remove'])->name('cart.remove');
@@ -147,6 +174,12 @@ Route::post('/admin/logout', [AuthController::class, 'adminLogout'])->name('admi
 // Khu vực quản trị (yêu cầu đăng nhập với quyền admin)
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/coupons', [CouponController::class, 'index'])->name('admin.coupons.index');
+    Route::post('/coupons', [CouponController::class, 'store'])->name('admin.coupons.store');
+    Route::post('/coupons/{coupon}/toggle', [CouponController::class, 'toggle'])->name('admin.coupons.toggle');
+    Route::resource('/articles', ArticleController::class, ['as' => 'admin'])->except(['show']);
+    Route::post('/videos/{video}/toggle', [VideoController::class, 'toggle'])->name('admin.videos.toggle');
+    Route::resource('/videos', VideoController::class, ['as' => 'admin'])->except(['show']);
     Route::resource('/products', ProductController::class, ['as' => 'admin']);
     Route::resource('/categories', CategoryController::class, ['as' => 'admin']);
     Route::post('/orders/bulk-update', [OrderController::class, 'bulkUpdate'])->name('admin.orders.bulk_update');

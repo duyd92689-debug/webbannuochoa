@@ -34,7 +34,7 @@
                     ['icon' => '🌿', 'bg' => '#f0fdf4', 'accent' => '#059669', 'tag' => 'Thảo Mộc & Xanh', 'desc' => 'Tươi mát, thuần khiết & tự nhiên'],
                     ['icon' => '🪵', 'bg' => '#fdf4ea', 'accent' => '#b45309', 'tag' => 'Hương Gỗ Quý', 'desc' => 'Trầm ấm, chững chạc & cuốn hút'],
                     ['icon' => '🌊', 'bg' => '#eff6ff', 'accent' => '#2563eb', 'tag' => 'Hương Biển Sảng Khoái', 'desc' => 'Phóng khoáng, tự do & tươi mới'],
-                    ['icon' => '✨', 'bg' => '#fdf2f8', 'accent' => '#db2777', 'tag' => 'Nước Hoa Niche', 'desc' => 'Độc bản, sang trọng & tinh hoa'],
+                    ['icon' => '💎', 'bg' => '#fdf2f8', 'accent' => '#db2777', 'tag' => 'Nước Hoa Niche', 'desc' => 'Độc bản, sang trọng & tinh hoa'],
                     ['icon' => '🌙', 'bg' => '#f5f3ff', 'accent' => '#7c3aed', 'tag' => 'Dạ Tiệc & Huyền Bí', 'desc' => 'Say đắm, nồng nàn & bí ẩn'],
                     ['icon' => '🍊', 'bg' => '#fff7ed', 'accent' => '#ea580c', 'tag' => 'Cam Chanh Tươi Mới', 'desc' => 'Năng động, căng tràn sức sống'],
                     ['icon' => '🔥', 'bg' => '#fff1f2', 'accent' => '#e11d48', 'tag' => 'Gia Vị Phương Đông', 'desc' => 'Ấm nồng, đam mê & cá tính'],

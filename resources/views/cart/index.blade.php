@@ -110,7 +110,7 @@
                                     @endif
                                     @if(!empty($item['has_engrave']) && !empty($item['engrave_text']))
                                         <span class="addon-badge engrave-badge">
-                                            ✨ Khắc Laser: "<strong>{{ $item['engrave_text'] }}</strong>"
+                                            ✒️ Khắc Laser: "<strong>{{ $item['engrave_text'] }}</strong>"
                                         </span>
                                     @endif
                                 </div>

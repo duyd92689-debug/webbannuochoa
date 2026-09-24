@@ -18,6 +18,10 @@
                     <div class="ht-account-menu">
                         <strong>Chào, {{ Auth::user()->name }}</strong>
                         <a href="{{ route('orders.index') }}">Đơn mua của tôi</a>
+                        <a href="{{ route('store.wardrobe') }}">💎 Tủ nước hoa của tôi</a>
+                        <a href="{{ route('store.wishlist') }}">Mùi hương yêu thích</a>
+                        <a href="{{ route('store.member') }}">👑 Thẻ thành viên VIP</a>
+                        @if(Auth::user()->role === 'admin')<a href="{{ route('admin.coupons.index') }}">Mã ưu đãi</a>@endif
                         <a href="{{ route('orders.tracking') }}">Tra cứu đơn hàng</a>
                         @if(Auth::user()->role === 'admin')<a href="{{ route('admin.dashboard') }}">Quản trị cửa hàng</a>@endif
                         <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Đăng xuất</button></form>
@@ -36,9 +40,12 @@
         <nav class="store-container ht-nav" aria-label="Danh mục nước hoa">
             <div class="ht-nav-links">
                 <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home', 'welcome') && !request()->hasAny(['gender', 'category', 'search', 'sort'])])>Khám phá</a>
-                <a href="{{ route('home', ['gender' => 'nu']) }}#san-pham" @class(['active' => request('gender') === 'nu'])>Nước hoa nữ</a>
-                <a href="{{ route('home', ['gender' => 'nam']) }}#san-pham" @class(['active' => request('gender') === 'nam'])>Nước hoa nam</a>
-                <a href="{{ route('home', ['gender' => 'unisex']) }}#san-pham" @class(['active' => request('gender') === 'unisex'])>Unisex</a>
+                <a href="{{ route('store.quiz') }}" @class(['active' => request()->routeIs('store.quiz*')])>Trắc nghiệm hương</a>
+                <a href="{{ route('store.discovery-box') }}" @class(['active' => request()->routeIs('store.discovery-box')])>🎁 Hộp thử mùi</a>
+                <a href="{{ route('store.scent-of-the-day') }}" @class(['active' => request()->routeIs('store.scent-of-the-day')])>⭐ Mùi hôm nay</a>
+                <a href="{{ route('home', ['gender' => 'nu']) }}#san-pham" @class(['active' => request()->routeIs('home', 'welcome') && request('gender') === 'nu'])>Nước hoa nữ</a>
+                <a href="{{ route('home', ['gender' => 'nam']) }}#san-pham" @class(['active' => request()->routeIs('home', 'welcome') && request('gender') === 'nam'])>Nước hoa nam</a>
+                <a href="{{ route('home', ['gender' => 'unisex']) }}#san-pham" @class(['active' => request()->routeIs('home', 'welcome') && request('gender') === 'unisex'])>Unisex</a>
                 <details class="ht-category-menu">
                     <summary>Danh mục @include('partials.icon', ['name' => 'chevron', 'size' => 14])</summary>
                     <div class="ht-category-dropdown">
@@ -49,8 +56,10 @@
                     </div>
                 </details>
                 <a href="{{ route('home', ['sort' => 'sale']) }}#san-pham" @class(['ht-nav-sale', 'active' => request('sort') === 'sale'])>Ưu đãi</a>
+                <a href="{{ route('store.compare') }}" @class(['active' => request()->routeIs('store.compare')])>So sánh</a>
+                <a href="{{ route('store.journal') }}">Cẩm nang</a>
+                <a href="{{ route('store.faq') }}" @class(['active' => request()->routeIs('store.faq')])>Hỏi đáp</a>
             </div>
-            <a class="ht-tracking-link" href="{{ route('orders.tracking') }}">@include('partials.icon', ['name' => 'truck', 'size' => 17]) Tra cứu đơn hàng</a>
         </nav>
     </div>
 </header>

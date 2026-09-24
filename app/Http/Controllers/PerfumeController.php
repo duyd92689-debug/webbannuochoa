@@ -59,9 +59,51 @@ class PerfumeController extends Controller
 
     public function show(Perfume $perfume): View
     {
+        abort_unless($perfume->is_active || auth()->user()?->role === 'admin', 404);
         $perfume->load('category');
+        $reviews = $perfume->reviews()->with('user:id,name')->latest()->paginate(5);
+        $averageRating = round((float) $perfume->reviews()->avg('rating'), 1);
+        $isFavorite = auth()->check() && \Illuminate\Support\Facades\DB::table('wishlists')
+            ->where('user_id', auth()->id())->where('perfume_id', $perfume->id)->exists();
 
-        return view('perfumes.show', compact('perfume'));
+        // Related products: same category first, then same gender, exclude self
+        $related = Perfume::where('is_active', true)
+            ->where('id', '!=', $perfume->id)
+            ->when($perfume->category_id, function ($q) use ($perfume) {
+                $q->where('category_id', $perfume->category_id);
+            }, function ($q) use ($perfume) {
+                $q->where('gender', $perfume->gender);
+            })
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        // If fewer than 4 from same category, fill with same gender
+        if ($related->count() < 4 && $perfume->category_id) {
+            $existingIds = $related->pluck('id')->push($perfume->id);
+            $extra = Perfume::where('is_active', true)
+                ->whereNotIn('id', $existingIds)
+                ->where('gender', $perfume->gender)
+                ->inRandomOrder()
+                ->take(4 - $related->count())
+                ->get();
+            $related = $related->concat($extra);
+        }
+
+        // Lưu lịch sử xem gần đây
+        $recentIds = session()->get('recently_viewed', []);
+        $recentIds = array_diff($recentIds, [$perfume->id]);
+        array_unshift($recentIds, $perfume->id);
+        $recentIds = array_slice($recentIds, 0, 8);
+        session()->put('recently_viewed', $recentIds);
+
+        // Lấy danh sách sản phẩm vừa xem (ngoại trừ chai hiện tại)
+        $recentlyViewed = Perfume::whereIn('id', array_slice($recentIds, 1, 4))->where('is_active', true)->get();
+
+        $inWardrobe = auth()->check() && \App\Models\ScentWardrobe::where('user_id', auth()->id())
+            ->where('perfume_id', $perfume->id)->exists();
+
+        return view('perfumes.show', compact('perfume', 'reviews', 'averageRating', 'isFavorite', 'related', 'recentlyViewed', 'inWardrobe'));
     }
 
     public function edit(Perfume $perfume): View
@@ -81,7 +123,9 @@ class PerfumeController extends Controller
         }
 
         $data['is_active'] = $request->boolean('is_active');
+        $previousStock = $perfume->stock;
         $perfume->update($data);
+        \App\Services\StockAlertService::notifyIfRestocked($perfume, $previousStock);
 
         return redirect()->route('perfumes.show', $perfume)
             ->with('success', 'Đã cập nhật nước hoa thành công.');

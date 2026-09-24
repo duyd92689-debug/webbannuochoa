@@ -161,8 +161,13 @@
 
     {{-- Pagination --}}
     @if($products->hasPages())
-        <div class="d-flex justify-content-center mt-4">
-            {{ $products->links() }}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-3 border-top">
+            <div class="text-muted small">
+                Hiển thị <strong>{{ $products->firstItem() }}</strong> - <strong>{{ $products->lastItem() }}</strong> trong tổng số <strong>{{ $products->total() }}</strong> sản phẩm
+            </div>
+            <div>
+                {{ $products->links() }}
+            </div>
         </div>
     @endif
 </div>

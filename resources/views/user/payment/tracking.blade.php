@@ -280,7 +280,7 @@
     text-transform: uppercase;
 }
 .tracking-header-title h1 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 2.4rem;
     font-weight: 600;
     color: #111827;

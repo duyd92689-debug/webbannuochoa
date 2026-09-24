@@ -63,7 +63,7 @@
     <div class="col-md-6 mb-4">
         <div class="admin-card h-100">
             <h5 class="font-weight-bold mb-2" style="color: var(--text-dark); display: flex; align-items: center; gap: 8px;">
-                <span style="color: var(--pink-main);"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                <span style="color: var(--pink-main);"><i class="fa-solid fa-compass"></i></span>
                 Lối tắt quản trị
             </h5>
             <p class="text-muted mb-4" style="font-size:0.88rem;">Truy cập nhanh các chức năng quản lý danh mục, sản phẩm và đơn hàng.</p>

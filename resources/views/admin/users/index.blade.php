@@ -84,9 +84,14 @@
         </table>
     </div>
 
-    @if(method_exists($users, 'links'))
-        <div class="mt-3">
-            {{ $users->links() }}
+    @if($users->hasPages())
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-3 border-top">
+            <div class="text-muted small">
+                Hiển thị <strong>{{ $users->firstItem() }}</strong> - <strong>{{ $users->lastItem() }}</strong> trong tổng số <strong>{{ $users->total() }}</strong> người dùng
+            </div>
+            <div>
+                {{ $users->links() }}
+            </div>
         </div>
     @endif
 </div>

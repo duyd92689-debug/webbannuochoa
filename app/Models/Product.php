@@ -15,7 +15,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id', 'name', 'slug', 'brand', 'gender', 'concentration',
-        'volume_ml', 'weight', 'price', 'sale_price', 'stock', 'stock_10ml', 'stock_50ml', 'image_url',
+        'volume_ml', 'weight', 'price', 'sale_price', 'stock', 'stock_10ml', 'stock_50ml', 'image_url', 'video_url',
         'description', 'is_active',
     ];
 

@@ -1,18 +1,61 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#fff6f8">
-    <meta name="description" content="Ha Thu Perfume — Khám phá nước hoa chính hãng, chọn hương thơm mang dấu ấn của riêng bạn.">
+
+    {{-- SEO: Title & Description --}}
     <title>@yield('title', 'Ha Thu Perfume · Hương thơm của riêng bạn')</title>
+    <meta name="description" content="@yield('meta_description', 'Ha Thu Perfume Studio — Khám phá nước hoa chính hãng 100%. Giao hàng toàn quốc, đóng gói 3 lớp, hỗ trợ đổi trả trong 7 ngày.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'nước hoa chính hãng, nước hoa nữ, nước hoa nam, Dior, Chanel, YSL, nước hoa Ha Thu')">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- Open Graph (Facebook / Zalo share) --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ha Thu Perfume Studio">
+    <meta property="og:title" content="@yield('title', 'Ha Thu Perfume · Hương thơm của riêng bạn')">
+    <meta property="og:description" content="@yield('meta_description', 'Ha Thu Perfume Studio — Nước hoa chính hãng, giao toàn quốc.')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-hathu.jpg'))">
+    <meta property="og:locale" content="vi_VN">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', 'Ha Thu Perfume · Hương thơm của riêng bạn')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Ha Thu Perfume Studio — Nước hoa chính hãng, giao toàn quốc.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('images/og-hathu.jpg'))">
+
+    {{-- Structured Data: Local Business --}}
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Store',
+        'name' => 'Ha Thu Perfume Studio',
+        'description' => 'Cửa hàng nước hoa chính hãng, đa dạng thương hiệu quốc tế.',
+        'url' => config('app.url'),
+        'image' => asset('images/og-hathu.jpg'),
+        'priceRange' => '₫₫',
+        'currenciesAccepted' => 'VND',
+        'paymentAccepted' => 'Cash, Credit Card, MoMo',
+        'areaServed' => 'VN',
+        'sameAs' => [
+            'https://facebook.com/hathu.perfume',
+            'https://instagram.com/hathu.perfume',
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+
     <link rel="icon" href="{{ asset('images/ha-thu-mark.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap&subset=vietnamese">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
+
 <body class="store-page boutique-store" style="--ht-auth-image:url('{{ asset('images/products/narciso-musc-noir-rose.jpg') }}')">
     @include('partials.store-header')
     <main class="public-main" id="main-content" tabindex="-1">
@@ -21,9 +64,14 @@
         @yield('content')
     </main>
     @include('partials.store-footer')
+    @include('partials.social-float')
+    @include('partials.discount-popup')
     @include('partials.chat_popup')
+    @include('partials.lucky-wheel')
+    @include('partials.video_modal')
     {{-- Shared theme follows the existing page-specific styles. --}}
     @vite('resources/css/boutique.css')
+    <link rel="stylesheet" href="{{ asset('css/store-experience.css') }}">
     @stack('scripts')
 </body>
 </html>

@@ -115,6 +115,58 @@
                     </div>
                 </div>
 
+                {{-- Dịch Vụ Gói Quà Cao Cấp & Thiệp Chúc Mừng --}}
+                <div class="checkout-card" id="giftServiceCard">
+                    <div class="card-section-header">
+                        <div class="icon-circle">🎁</div>
+                        <div>
+                            <h2>Dịch Vụ Gói Quà Cao Cấp & Thiệp Chúc Mừng</h2>
+                            <small>Món quà hoàn hảo trao tận tay người thương</small>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff8fb; border: 1.5px solid #fbcfe8; border-radius: 14px; padding: 16px; margin-bottom: 16px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 700; color: #be185d; font-size: 15px;">
+                            <input type="checkbox" id="giftWrapToggle" name="enable_gift_service" value="1" style="width: 18px; height: 18px; accent-color: #be185d;">
+                            <span>Yêu cầu Gói Quà Cao Cấp & Thiệp Chúc Mừng</span>
+                        </label>
+                        <p style="margin: 4px 0 0 28px; font-size: 13px; color: #715865;">Đóng hộp cứng cao cấp kèm nơ lụa, xịt hương thơm tinh tế trước khi đóng gói.</p>
+                    </div>
+
+                    <div id="giftOptionsBox" style="display: none; animation: fadeInGift 0.3s ease;">
+                        <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                            <div class="form-group-item">
+                                <label for="gift_wrap">Mẫu giấy & hộp quà:</label>
+                                <select id="gift_wrap" name="gift_wrap" class="form-select">
+                                    <option value="Nhung đỏ rượu vang (Wine Velvet)">Nhung đỏ rượu vang quý phái</option>
+                                    <option value="Giấy Kraft Paris cổ điển (Vintage Kraft)">Giấy Kraft Paris vintage mộc mạc</option>
+                                    <option value="Lụa hồng phấn kiêu kỳ (Blush Pink)">Lụa hồng phấn ngọt ngào</option>
+                                    <option value="Đen huyền bí sang trọng (Midnight Black)">Đen huyền bí sang trọng</option>
+                                </select>
+                            </div>
+                            <div class="form-group-item">
+                                <label for="gift_card">Mẫu thiệp chúc mừng:</label>
+                                <select id="gift_card" name="gift_card" class="form-select">
+                                    <option value="Sinh nhật (Happy Birthday)">🎂 Sinh nhật (Happy Birthday)</option>
+                                    <option value="Kỷ niệm (Happy Anniversary)">🌹 Kỷ niệm (Happy Anniversary)</option>
+                                    <option value="Tình yêu (With Love)">💌 Tình yêu ngọt ngào (With Love)</option>
+                                    <option value="Tri ân & Cảm ơn (Thank You)">🙏 Tri ân & Cảm ơn (Thank You)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-item" style="margin-bottom: 14px;">
+                            <label for="gift_message">Lời nhắn chúc mừng (in lên thiệp):</label>
+                            <textarea id="gift_message" name="gift_message" rows="2" placeholder="Ví dụ: Chúc em sinh nhật vui vẻ, luôn rạng rỡ và ngát hương thơm mỗi ngày nhé!"></textarea>
+                        </div>
+
+                        <div class="form-group-item">
+                            <label for="gift_delivery_date">Ngày giao mong muốn (để nhận đúng ngày đặc biệt):</label>
+                            <input type="date" id="gift_delivery_date" name="gift_delivery_date" min="{{ date('Y-m-d') }}">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="checkout-card">
                     <div class="card-section-header">
                         <div class="icon-circle">3</div>
@@ -208,6 +260,15 @@
                             <span>Tổng khối lượng tính phí</span>
                             <strong style="color: #db2777; font-weight: 700;">{{ isset($totalWeight) ? $totalWeight : 200 }} g</strong>
                         </div>
+                        <div class="ht-checkout-promos">
+                            <label>Mã ưu đãi<input name="coupon_code" value="{{ old('coupon_code') }}" placeholder="Nhập mã nếu có" maxlength="30"></label>
+                            @if($availableCoupons->isNotEmpty())<small>Mã hiện có: @foreach($availableCoupons as $coupon)<strong>{{ $coupon->code }}</strong>{{ !$loop->last ? ', ' : '' }}@endforeach</small>@endif
+                            <label>Điểm thành viên muốn dùng<input name="points_used" type="number" min="0" max="{{ min($loyaltyBalance, floor($totalPrice * .2 / 1000)) }}" value="{{ old('points_used', 0) }}"></label>
+                            <small>Bạn có {{ $loyaltyBalance }} điểm · 1 điểm giảm 1.000₫ · tối đa 20% tiền hàng. Ưu đãi được xác nhận khi đặt hàng.</small>
+                            @error('coupon_code')<span class="text-danger">{{ $message }}</span>@enderror
+                            @error('points_used')<span class="text-danger">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="cost-row"><span>Ưu đãi dự tính</span><strong id="discount_preview">0 VNĐ</strong></div>
                         <div class="cost-row shipping-row">
                             <span>Cước vận chuyển GHN</span>
                             <strong id="shipping_fee_text" class="fee-waiting">-- Chọn địa chỉ --</strong>
@@ -274,7 +335,7 @@
     text-transform: uppercase;
 }
 .checkout-header-title h1 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 2.2rem;
     font-weight: 600;
     color: #111827;
@@ -709,6 +770,16 @@
 
 {{-- Đoạn script GHN bắt buộc theo tài liệu hướng dẫn (Trang 18 - 22) --}}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const giftWrapToggle = document.getElementById('giftWrapToggle');
+    const giftOptionsBox = document.getElementById('giftOptionsBox');
+    if (giftWrapToggle && giftOptionsBox) {
+        giftWrapToggle.addEventListener('change', function () {
+            giftOptionsBox.style.display = this.checked ? 'block' : 'none';
+        });
+    }
+});
+
 function choosePayment(method) {
     const radioCod = document.getElementById('radio_cod');
     const radioMomo = document.getElementById('radio_momo');
@@ -745,23 +816,36 @@ document.addEventListener("DOMContentLoaded", function () {
     // Lấy tiền hàng an toàn từ input ẩn
     const subtotal = parseInt(totalPriceInput ? totalPriceInput.value : 0) || 0;
 
-    // Helper cập nhật hoặc reset cước phí
+    @php($couponPreview = $availableCoupons->map(fn ($coupon) => ['code' => $coupon->code, 'type' => $coupon->type, 'value' => $coupon->value])->values())
+    const coupons = {{ Illuminate\Support\Js::from($couponPreview) }};
+    const couponInput = document.querySelector('[name="coupon_code"]');
+    const pointsInput = document.querySelector('[name="points_used"]');
+    const discountPreview = document.getElementById('discount_preview');
+    let currentShippingFee = 0;
+    function renderTotal() {
+        const coupon = coupons.find(item => item.code === (couponInput?.value || '').trim().toUpperCase());
+        const couponDiscount = coupon ? Math.min(subtotal, coupon.type === 'percent' ? Math.floor(subtotal * coupon.value / 100) : coupon.value) : 0;
+        const maxPoints = Math.min({{ $loyaltyBalance }}, Math.floor((subtotal - couponDiscount) * 0.2 / 1000));
+        const points = Math.min(maxPoints, Math.max(0, parseInt(pointsInput?.value || '0', 10) || 0));
+        const savings = couponDiscount + points * 1000;
+        discountPreview.textContent = savings ? '- ' + new Intl.NumberFormat('vi-VN').format(savings) + ' VNĐ' : '0 VNĐ';
+        const finalAmount = Math.max(0, subtotal + currentShippingFee - savings);
+        finalTotalText.textContent = new Intl.NumberFormat('vi-VN').format(finalAmount) + ' VNĐ';
+        if (totalPriceInput) totalPriceInput.value = finalAmount;
+    }
+    couponInput?.addEventListener('input', renderTotal);
+    pointsInput?.addEventListener('input', renderTotal);
     function resetShippingFee(message = '-- Chờ chọn Phường/Xã --') {
-        shippingFeeText.innerHTML = `<span style="color: #9ca3af; font-weight: 500; font-size: 0.88rem;">${message}</span>`;
-        finalTotalText.innerText = new Intl.NumberFormat('vi-VN').format(subtotal) + ' VNĐ';
-        if (totalPriceInput) {
-            totalPriceInput.value = subtotal;
-        }
+        currentShippingFee = 0;
+        shippingFeeText.textContent = message;
+        renderTotal();
     }
-
     function applyShippingFee(fee) {
-        shippingFeeText.innerHTML = `<span style="color: #059669; font-weight: 700;">+ ${new Intl.NumberFormat('vi-VN').format(fee)} VNĐ</span>`;
-        const finalAmount = subtotal + fee;
-        finalTotalText.innerText = new Intl.NumberFormat('vi-VN').format(finalAmount) + ' VNĐ';
-        if (totalPriceInput) {
-            totalPriceInput.value = finalAmount;
-        }
+        currentShippingFee = fee;
+        shippingFeeText.textContent = '+ ' + new Intl.NumberFormat('vi-VN').format(fee) + ' VNĐ';
+        renderTotal();
     }
+    renderTotal();
 
     // 1. Tải danh sách Tỉnh/Thành phố từ GHN
     fetch("{{ route('locations.provinces') }}")

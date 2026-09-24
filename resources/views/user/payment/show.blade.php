@@ -164,8 +164,43 @@
                                 @endif
                             </span>
                         </div>
-                    </div>
                 </div>
+
+                @if($order->gift_wrap || $order->gift_card || $order->gift_message || $order->gift_delivery_date)
+                    <div class="detail-card" style="margin-top: 20px; border: 1px solid rgba(225, 29, 72, 0.25); background: linear-gradient(180deg, #fff5f7 0%, #ffffff 100%);">
+                        <h3 class="detail-card-title" style="color: #be123c; display:flex; align-items:center; gap:8px;">
+                            <span>🎁</span> Dịch vụ quà tặng cao cấp
+                        </h3>
+                        <div class="info-list">
+                            @if($order->gift_wrap)
+                                <div class="info-row">
+                                    <span class="info-label">Gói quà:</span>
+                                    <span class="info-value"><strong>{{ $order->gift_wrap }}</strong></span>
+                                </div>
+                            @endif
+                            @if($order->gift_card)
+                                <div class="info-row">
+                                    <span class="info-label">Thiệp tặng:</span>
+                                    <span class="info-value"><strong>{{ $order->gift_card }}</strong></span>
+                                </div>
+                            @endif
+                            @if($order->gift_delivery_date)
+                                <div class="info-row">
+                                    <span class="info-label">Ngày giao quà:</span>
+                                    <span class="info-value"><strong style="color:#e11d48;">{{ \Carbon\Carbon::parse($order->gift_delivery_date)->format('d/m/Y') }}</strong></span>
+                                </div>
+                            @endif
+                            @if($order->gift_message)
+                                <div class="info-row" style="flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 6px;">
+                                    <span class="info-label">Lời chúc gửi kèm:</span>
+                                    <div style="background:#fff; border:1px dashed #f43f5e; padding:10px 14px; border-radius:8px; font-style:italic; color:#881337; width:100%; box-sizing:border-box;">
+                                        “{{ $order->gift_message }}”
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <div class="detail-card" style="margin-top: 20px;">
                     <h3 class="detail-card-title">Tổng kết chi phí</h3>
@@ -247,7 +282,7 @@
     text-transform: uppercase;
 }
 .order-detail-header h1 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 2.2rem;
     font-weight: 600;
     color: #111827;

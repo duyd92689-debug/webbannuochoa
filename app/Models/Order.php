@@ -18,6 +18,9 @@ class Order extends Model
         'address',
         'phone',
         'total_price',
+        'coupon_code',
+        'discount_amount',
+        'points_used',
         'status',
         'shipping_status',
         // Các trường GHN:
@@ -25,6 +28,11 @@ class Order extends Model
         'ghn_total_fee',
         'to_district_id',
         'to_ward_code',
+        // Quà tặng cao cấp & Lời nhắn:
+        'gift_wrap',
+        'gift_card',
+        'gift_message',
+        'gift_delivery_date',
     ];
 
     protected function casts(): array

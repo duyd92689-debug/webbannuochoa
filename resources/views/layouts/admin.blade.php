@@ -7,7 +7,9 @@
     <title>@yield('title', 'Quản trị') · Ha Thu Perfume</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap&subset=vietnamese" rel="stylesheet">
     <style>
         :root {
             --pink:       #e8728a;
@@ -320,6 +322,63 @@
         .bg-primary { background: linear-gradient(135deg, var(--pink-dark), var(--pink)) !important; }
         .bg-light { background-color: var(--pink-soft) !important; }
 
+        /* ── PAGINATION BEAUTY ── */
+        .pagination {
+            display: inline-flex !important;
+            gap: 5px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+            align-items: center !important;
+        }
+        .page-item .page-link {
+            border-radius: 8px !important;
+            border: 1.5px solid rgba(232,114,138,.25) !important;
+            color: #4a3540 !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding: 6px 14px !important;
+            background: #ffffff !important;
+            transition: all 0.2s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 36px !important;
+            height: 36px !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
+            text-decoration: none !important;
+        }
+        .page-item:hover .page-link {
+            background: var(--pink-pale) !important;
+            color: var(--pink-dark) !important;
+            border-color: var(--pink-light) !important;
+        }
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--pink-dark), var(--pink)) !important;
+            border-color: var(--pink-dark) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(232,114,138,.35) !important;
+        }
+        .page-item.disabled .page-link {
+            opacity: 0.45 !important;
+            background: #fafafa !important;
+            color: #94a3b8 !important;
+            border-color: #e2e8f0 !important;
+            cursor: not-allowed !important;
+        }
+        .pagination svg {
+            width: 16px !important;
+            height: 16px !important;
+        }
+        nav[role="navigation"] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        nav[role="navigation"] > div:first-child {
+            display: none !important;
+        }
+
         .form-control, .custom-select {
             border-radius: 8px;
             border: 1.5px solid rgba(232,114,138,.25);
@@ -389,6 +448,21 @@
                 <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-receipt"></i>
                     <span>Đơn hàng</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.coupons.index') }}" class="{{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-ticket"></i><span>Mã ưu đãi</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.articles.index') }}" class="{{ request()->routeIs('admin.articles.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-book-open"></i><span>Cẩm nang</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.videos.index') }}" class="{{ request()->routeIs('admin.videos.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clapperboard"></i><span>Video & Shorts</span>
                 </a>
             </li>
             <li>
@@ -587,25 +661,62 @@
     #admin-chat-box #chat-messages {
         flex: 1;
         overflow-y: auto;
-        padding: 12px;
-        background: #fdfdfe;
+        padding: 14px 12px;
+        background: #faf8f9;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
     .msg-row {
-        margin-bottom: 8px;
+        max-width: 85%;
         font-size: 0.88rem;
         word-break: break-word;
-        padding: 6px 10px;
-        border-radius: 8px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        line-height: 1.42;
     }
     .msg-admin {
-        background: #eff6ff;
-        border-left: 3px solid #3b82f6;
-        color: #1e3a8a;
+        align-self: flex-end;
+        background: #2563eb;
+        color: #ffffff;
+        border-bottom-right-radius: 3px;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+    }
+    .msg-admin .msg-author {
+        color: #dbeafe;
+    }
+    .msg-admin .msg-time {
+        color: rgba(255, 255, 255, 0.75);
     }
     .msg-customer {
-        background: #fdf2f8;
-        border-left: 3px solid #db2777;
-        color: #831843;
+        align-self: flex-start;
+        background: #ffffff;
+        color: #1f2937;
+        border: 1px solid #f1e4eb;
+        border-bottom-left-radius: 3px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+    .msg-customer .msg-author {
+        color: #be185d;
+    }
+    .msg-customer .msg-time {
+        color: #9ca3af;
+    }
+    .msg-meta-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 3px;
+        font-size: 0.72rem;
+    }
+    .msg-author {
+        font-weight: 700;
+    }
+    .msg-time {
+        font-size: 0.68rem;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
     }
     </style>
 
@@ -742,6 +853,40 @@
             window.selectUser(userId, userName, null);
         };
 
+        function formatChatTime(dateStr) {
+            if (!dateStr) return '';
+            try {
+                let s = String(dateStr).trim();
+                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(s)) {
+                    s = s.replace(' ', 'T');
+                }
+                const d = new Date(s);
+                if (isNaN(d.getTime())) return '';
+                const now = new Date();
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                const timePart = `${hours}:${minutes}`;
+
+                if (d.toDateString() === now.toDateString()) {
+                    return timePart;
+                }
+                const yest = new Date(now);
+                yest.setDate(now.getDate() - 1);
+                if (d.toDateString() === yest.toDateString()) {
+                    return `Hôm qua ${timePart}`;
+                }
+                return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')} ${timePart}`;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
         // 4. Tải tin nhắn của khách hàng được chọn
         function loadMessages() {
             if (!currentUserId) return;
@@ -758,11 +903,16 @@
                     } else {
                         messages.forEach(msg => {
                             let isAdmin = (msg.sender_id == "{{ Auth::id() }}");
-                            let senderName = isAdmin ? "Bạn (Admin)" : (msg.sender ? msg.sender.name : "Khách");
-                            let rowClass = isAdmin ? "msg-admin text-right" : "msg-customer text-left";
+                            let senderName = isAdmin ? "Bạn (Admin)" : (msg.sender ? msg.sender.name : "Khách hàng");
+                            let rowClass = isAdmin ? "msg-admin" : "msg-customer";
+                            let timeStr = formatChatTime(msg.created_at);
+
                             html += `<div class="msg-row ${rowClass}">
-                                <div style="font-size:0.75rem; font-weight:700; opacity:0.8;">${senderName}</div>
-                                <div style="margin-top:2px;">${msg.content}</div>
+                                <div class="msg-meta-header">
+                                    <span class="msg-author">${escapeHtml(senderName)}</span>
+                                    <span class="msg-time">${timeStr}</span>
+                                </div>
+                                <div style="margin-top:2px;">${escapeHtml(msg.content)}</div>
                             </div>`;
                         });
                     }

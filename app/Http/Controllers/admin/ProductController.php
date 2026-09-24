@@ -85,7 +85,9 @@ class ProductController extends Controller
         }
 
         $data['is_active'] = $request->boolean('is_active');
+        $previousStock = $product->stock;
         $product->update($data);
+        \App\Services\StockAlertService::notifyIfRestocked($product, $previousStock);
 
         return redirect()->route('admin.products.show', $product)
             ->with('success', 'Đã cập nhật sản phẩm thành công.');
@@ -131,6 +133,7 @@ class ProductController extends Controller
             'stock_50ml'   => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'image_url'    => ['nullable', 'string', 'max:2048', 'regex:/^(https?:\/\/|\/?images\/)/i'],
             'image_file'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'video_url'    => ['nullable', 'string', 'max:2048'],
             'description'  => ['nullable', 'string', 'max:5000'],
             'is_active'    => ['nullable', 'boolean'],
         ], [

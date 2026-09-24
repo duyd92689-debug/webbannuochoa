@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\Perfume;
 use App\Services\GHNOrderService;
 use App\Services\GHNService;
+use App\Services\LoyaltyService;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +75,10 @@ class OrderController extends Controller
         $totalPrice = $cartItems->sum('total');
         $totalWeight = $cartItems->sum('total_weight');
 
-        return view('user.payment.index', compact('cart', 'cartItems', 'totalPrice', 'totalWeight'));
+        $loyaltyBalance = LoyaltyService::balance(Auth::id());
+        $availableCoupons = Coupon::where('is_active', true)->orderBy('minimum_order')->get()
+            ->filter(fn (Coupon $coupon) => $coupon->isAvailableFor((int) $totalPrice));
+        return view('user.payment.index', compact('cart', 'cartItems', 'totalPrice', 'totalWeight', 'loyaltyBalance', 'availableCoupons'));
     }
 
     public function processPayment(Request $request, GHNService $ghn, GHNOrderService $ghnOrderService)
@@ -101,6 +107,8 @@ class OrderController extends Controller
             'to_ward_code' => 'required|string',
             'payment_method' => 'nullable|in:cod,momo,atm_domestic,atm_international',
             'note' => 'nullable|string|max:500',
+            'coupon_code' => 'nullable|string|max:30',
+            'points_used' => 'nullable|integer|min:0',
         ], [
             'name.required' => 'Vui lòng nhập họ tên người nhận.',
             'phone.required' => 'Vui lòng nhập số điện thoại người nhận.',
@@ -185,11 +193,21 @@ class OrderController extends Controller
             ? (int) $feeResponse['data']['total']
             : 0;
 
-        // Tổng thanh toán = Tiền hàng + Phí ship
-        $finalTotal = $subtotal + $shippingFee;
-
-        // 3. Tạo đơn hàng và chi tiết đơn hàng trong Database
-        $order = DB::transaction(function () use ($request, $shippingFee, $finalTotal, $orderItemsData) {
+        // Khóa hàng dữ liệu liên quan để tránh dùng mã hay điểm quá giới hạn khi đặt cùng lúc.
+        $order = DB::transaction(function () use ($request, $shippingFee, $subtotal, $orderItemsData) {
+            DB::table('users')->where('id', Auth::id())->lockForUpdate()->first();
+            $couponCode = strtoupper(trim((string) $request->input('coupon_code', '')));
+            $coupon = $couponCode ? Coupon::where('code', $couponCode)->lockForUpdate()->first() : null;
+            if ($couponCode && (! $coupon || ! $coupon->isAvailableFor((int) $subtotal))) {
+                throw ValidationException::withMessages(['coupon_code' => 'Mã ưu đãi không hợp lệ hoặc chưa đủ điều kiện.']);
+            }
+            $discount = $coupon ? $coupon->discountFor((int) $subtotal) : 0;
+            $points = (int) $request->input('points_used', 0);
+            $maximumPoints = min(LoyaltyService::balance(Auth::id()), (int) floor(($subtotal - $discount) * 0.2 / 1000));
+            if ($points > $maximumPoints) {
+                throw ValidationException::withMessages(['points_used' => 'Số điểm sử dụng vượt quá mức hiện có hoặc giới hạn 20% tiền hàng.']);
+            }
+            $finalTotal = max(0, $subtotal + $shippingFee - $discount - $points * 1000);
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'name' => $request->name,
@@ -197,11 +215,18 @@ class OrderController extends Controller
                 'address' => $request->address,
                 'phone' => $request->phone,
                 'total_price' => $finalTotal,
+                'coupon_code' => $coupon?->code,
+                'discount_amount' => $discount,
+                'points_used' => $points,
                 'status' => 'pending',
                 'to_district_id' => (int) $request->to_district_id,
                 'to_ward_code' => (string) $request->to_ward_code,
                 'ghn_total_fee' => $shippingFee,
                 'shipping_status' => 'pending',
+                'gift_wrap' => $request->input('gift_wrap'),
+                'gift_card' => $request->input('gift_card'),
+                'gift_message' => $request->input('gift_message'),
+                'gift_delivery_date' => $request->input('gift_delivery_date'),
             ]);
 
             foreach ($orderItemsData as $item) {

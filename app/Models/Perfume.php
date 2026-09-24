@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Perfume extends Model
@@ -13,7 +14,7 @@ class Perfume extends Model
 
     protected $fillable = [
         'category_id', 'name', 'slug', 'brand', 'gender', 'concentration',
-        'volume_ml', 'weight', 'price', 'sale_price', 'stock', 'stock_10ml', 'stock_50ml', 'image_url',
+        'volume_ml', 'weight', 'price', 'sale_price', 'stock', 'stock_10ml', 'stock_50ml', 'image_url', 'video_url',
         'description', 'is_active',
     ];
 
@@ -65,9 +66,37 @@ class Perfume extends Model
         return $this->stock_100ml;
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(PerfumeReview::class);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function videos(): HasMany
+    {
+        return $this->hasMany(Video::class, 'perfume_id');
+    }
+
+    public function getEmbedVideoUrlAttribute(): ?string
+    {
+        if (!$this->video_url) {
+            return null;
+        }
+        $url = trim((string) $this->video_url);
+        if (preg_match('/(?:youtube\.com\/shorts\/|youtu\.be\/shorts\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1] . '?autoplay=1&rel=0';
+        }
+        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1] . '?autoplay=1&rel=0';
+        }
+        if (preg_match('/tiktok\.com\/@[^\/]+\/video\/(\d+)/i', $url, $m)) {
+            return 'https://www.tiktok.com/player/v1/' . $m[1];
+        }
+        return $url;
     }
 
     public function getImageSrcAttribute(): ?string

@@ -146,7 +146,7 @@ class GHNTest extends TestCase
             ->get(route('payment.index'));
 
         $response->assertOk()
-            ->assertSee('Thanh Toán Đơn Hàng')
+            ->assertSee('Hoàn tất đơn hàng')
             ->assertSee('Giao Hàng Nhanh (GHN Express)')
             ->assertSee('3.500.000');
     }
@@ -233,7 +233,7 @@ class GHNTest extends TestCase
         $responseHistory = $this->actingAs($user)->get(route('orders.index'));
         $responseHistory->assertOk()
             ->assertSee('GHNTEST123')
-            ->assertSee('Lịch Sử Đơn Hàng');
+            ->assertSee('Đơn hàng của bạn');
 
         $responseShow = $this->actingAs($user)->get(route('orders.show', $order->id));
         $responseShow->assertOk()
@@ -270,7 +270,7 @@ class GHNTest extends TestCase
     {
         $response = $this->get(route('orders.tracking'));
         $response->assertOk()
-            ->assertSee('Kiểm Tra & Tra Cứu Đơn Hàng', false)
+            ->assertSee('Đơn hàng của bạn đến đâu rồi?')
             ->assertSee('Mã đơn hàng hoặc Mã vận đơn GHN');
     }
 

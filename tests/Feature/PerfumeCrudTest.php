@@ -111,11 +111,11 @@ class PerfumeCrudTest extends TestCase
         $homeResponse = $this->get(route('home'));
         $homeResponse
             ->assertOk()
-            ->assertSee('+ Thêm sản phẩm')
-            ->assertSee('search-decor', false)
+            ->assertSee('Tìm hương của bạn')
+            ->assertSee('ht-search', false)
             ->assertDontSee('store-product-actions', false)
             ->assertDontSee('Quản lý sản phẩm');
-        $this->assertSame(1, substr_count($homeResponse->getContent(), '+ Thêm sản phẩm'));
+        $this->assertSame(1, substr_count($homeResponse->getContent(), 'Tìm hương của bạn'));
 
         $this->get(route('perfumes.index'))
             ->assertOk()
@@ -182,9 +182,9 @@ class PerfumeCrudTest extends TestCase
         $this->get(route('home', ['search' => 'ronaldo']))
             ->assertOk()
             ->assertSee('Cristiano Ronaldo CR7')
-            ->assertSee('Kết quả tìm kiếm')
-            ->assertSee('filtered-results', false)
-            ->assertDontSee('store-hero', false);
+            ->assertSee('Kết quả cho')
+            ->assertSee('ht-products-section', false)
+            ->assertDontSee('ht-hero-grid', false);
     }
 
     private function perfumeData(array $overrides = []): array

@@ -58,7 +58,7 @@
                                                         @endif
                                                         @if($item->engrave_text)
                                                             <span class="badge badge-info mr-1">
-                                                                ✨ Khắc Laser: "<strong>{{ $item->engrave_text }}</strong>"
+                                                                ✒️ Khắc Laser: "<strong>{{ $item->engrave_text }}</strong>"
                                                             </span>
                                                         @endif
                                                     </div>
@@ -136,6 +136,38 @@
                 </div>
             </div>
         </div>
+
+        @if($order->gift_wrap || $order->gift_card || $order->gift_message || $order->gift_delivery_date)
+        <div class="admin-card mb-4" style="border: 2px dashed #f472b6; background: #fffdfd;">
+            <h5 class="font-weight-bold mb-3" style="color: #be185d;">
+                <i class="fa-solid fa-gift mr-2"></i> Yêu cầu Gói Quà & Thiệp Chúc Mừng
+            </h5>
+            <div class="row" style="font-size: 0.92rem;">
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted">Mẫu giấy gói:</span>
+                    <strong class="text-dark ml-1">{{ $order->gift_wrap ?: 'Mặc định sang trọng' }}</strong>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted">Mẫu thiệp:</span>
+                    <strong class="text-dark ml-1">{{ $order->gift_card ?: 'Thiệp chúc mừng' }}</strong>
+                </div>
+                @if($order->gift_delivery_date)
+                <div class="col-12 mb-2">
+                    <span class="text-muted">Ngày giao mong muốn:</span>
+                    <strong class="text-danger ml-1">📅 {{ \Carbon\Carbon::parse($order->gift_delivery_date)->format('d/m/Y') }}</strong>
+                </div>
+                @endif
+                @if($order->gift_message)
+                <div class="col-12 mt-2">
+                    <div class="p-3 rounded" style="background: #fff0f5; border-left: 3px solid #be185d;">
+                        <span class="text-muted font-weight-bold d-block mb-1">Lời nhắn in lên thiệp:</span>
+                        <em class="text-dark">“{{ $order->gift_message }}”</em>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Right Column: Status and Actions -->
@@ -143,28 +175,61 @@
         <!-- Status Card -->
         <div class="admin-card">
             <h5 class="font-weight-bold mb-3" style="color: #0f172a;">
-                <i class="fa-solid fa-sliders text-primary mr-2"></i> Trạng thái đơn hàng
+                <i class="fa-solid fa-sliders text-primary mr-2"></i> Trạng thái đơn hàng & Giao hàng
             </h5>
             
-            <div class="text-center py-3 my-3 bg-light rounded border">
-                <div class="small text-muted mb-2">Trạng thái hiện tại</div>
-                @if($order->status === 'pending')
-                    <span class="badge badge-warning text-dark px-4 py-2 font-weight-bold" style="border-radius: 30px; font-size: 0.9rem;">
-                        <i class="fa-regular fa-clock mr-1"></i> Chờ xử lý
+            <div class="py-3 px-3 my-3 bg-light rounded border">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small text-muted font-weight-bold">Trạng thái đơn:</span>
+                    @if($order->status === 'pending')
+                        <span class="badge badge-warning text-dark px-3 py-1 font-weight-bold" style="border-radius: 14px; font-size: 0.8rem;">
+                            <i class="fa-regular fa-clock mr-1"></i> Chờ xử lý
+                        </span>
+                    @elseif($order->status === 'confirmed')
+                        <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 14px; font-size: 0.8rem; background: #e0f2fe; color: #0369a1;">
+                            <i class="fa-solid fa-check mr-1"></i> Đã xác nhận
+                        </span>
+                    @elseif($order->status === 'completed')
+                        <span class="badge badge-success px-3 py-1 font-weight-bold" style="border-radius: 14px; font-size: 0.8rem; background: #dcfce7; color: #15803d;">
+                            <i class="fa-solid fa-circle-check mr-1"></i> Đã hoàn thành
+                        </span>
+                    @elseif($order->status === 'cancelled')
+                        <span class="badge badge-danger px-3 py-1 font-weight-bold" style="border-radius: 14px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c;">
+                            <i class="fa-solid fa-ban mr-1"></i> Đã hủy đơn
+                        </span>
+                    @else
+                        <span class="badge badge-secondary px-3 py-1 font-weight-bold" style="border-radius: 14px; font-size: 0.8rem;">{{ strtoupper($order->status) }}</span>
+                    @endif
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="small text-muted font-weight-bold">Trạng thái GHN:</span>
+                    @php
+                        $shStatus = $order->shipping_status ?? 'pending';
+                        $shColor = match($shStatus) {
+                            'delivered' => '#16a34a',
+                            'delivering', 'transporting', 'sorting', 'picked' => '#f59e0b',
+                            'ready_to_pick', 'picking' => '#06b6d4',
+                            'return', 'returning', 'returned' => '#ea580c',
+                            'cancelled' => '#dc2626',
+                            default => '#64748b'
+                        };
+                        $shLabels = [
+                            'pending' => 'Chờ tạo vận đơn',
+                            'ready_to_pick' => 'Chờ lấy hàng',
+                            'picking' => 'Đang lấy hàng',
+                            'delivering' => 'Đang giao hàng',
+                            'delivered' => 'Giao hàng thành công',
+                            'return' => 'Chờ hoàn hàng',
+                            'returned' => 'Đã hoàn hàng',
+                            'cancelled' => 'Hủy giao hàng',
+                        ];
+                    @endphp
+                    <span class="font-weight-bold small" style="color: {{ $shColor }};">
+                        <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $shColor }}; margin-right:3px;"></span>
+                        {{ $shLabels[$shStatus] ?? $shStatus }}
                     </span>
-                @elseif($order->status === 'confirmed')
-                    <span class="badge badge-primary px-4 py-2 font-weight-bold" style="border-radius: 30px; font-size: 0.9rem; background: #e0f2fe; color: #0369a1;">
-                        <i class="fa-solid fa-check mr-1"></i> Đã xác nhận
-                    </span>
-                @elseif($order->status === 'completed')
-                    <span class="badge badge-success px-4 py-2 font-weight-bold" style="border-radius: 30px; font-size: 0.9rem; background: #dcfce7; color: #15803d;">
-                        <i class="fa-solid fa-circle-check mr-1"></i> Đã hoàn thành
-                    </span>
-                @elseif($order->status === 'cancelled')
-                    <span class="badge badge-danger px-4 py-2 font-weight-bold" style="border-radius: 30px; font-size: 0.9rem; background: #fee2e2; color: #b91c1c;">
-                        <i class="fa-solid fa-ban mr-1"></i> Đã hủy đơn
-                    </span>
-                @endif
+                </div>
             </div>
 
             <!-- Error message if validation or exception fails -->
@@ -175,26 +240,44 @@
             @endif
 
             <!-- Update Status Form -->
-            <form method="POST" action="{{ route('admin.orders.update', $order) }}" class="mt-4">
+            <form method="POST" action="{{ route('admin.orders.update', $order) }}" class="mt-3">
                 @csrf
                 @method('PATCH')
                 
-                <div class="form-group">
+                {{-- 1. Trạng thái giao hàng GHN --}}
+                <div class="form-group mb-3">
+                    <label for="shippingStatusSelect" class="font-weight-bold text-muted small" style="text-transform: uppercase;">
+                        <i class="fa-solid fa-truck text-primary mr-1"></i> Trạng thái giao hàng (GHN)
+                    </label>
+                    <select name="shipping_status" id="shippingStatusSelect" class="form-control">
+                        <option value="pending" {{ $order->shipping_status === 'pending' ? 'selected' : '' }}>Chờ tạo vận đơn (Pending)</option>
+                        <option value="ready_to_pick" {{ $order->shipping_status === 'ready_to_pick' ? 'selected' : '' }}>Chờ lấy hàng (Ready to pick)</option>
+                        <option value="picking" {{ $order->shipping_status === 'picking' ? 'selected' : '' }}>Đang lấy hàng (Picking)</option>
+                        <option value="delivering" {{ $order->shipping_status === 'delivering' ? 'selected' : '' }}>Đang giao hàng (Delivering)</option>
+                        <option value="delivered" {{ $order->shipping_status === 'delivered' ? 'selected' : '' }}>Giao hàng thành công (Delivered)</option>
+                        <option value="return" {{ $order->shipping_status === 'return' ? 'selected' : '' }}>Chờ hoàn hàng (Return)</option>
+                        <option value="returned" {{ $order->shipping_status === 'returned' ? 'selected' : '' }}>Đã hoàn hàng (Returned)</option>
+                        <option value="cancelled" {{ $order->shipping_status === 'cancelled' ? 'selected' : '' }}>Hủy giao hàng (Cancelled)</option>
+                    </select>
+                </div>
+
+                {{-- 2. Trạng thái đơn hàng tổng thể --}}
+                <div class="form-group mb-3">
                     <label for="statusSelect" class="font-weight-bold text-muted small" style="text-transform: uppercase;">
-                        Thay đổi trạng thái đơn
+                        <i class="fa-solid fa-receipt text-primary mr-1"></i> Trạng thái đơn hàng
                     </label>
                     <select name="status" id="statusSelect" class="form-control">
                         <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Chờ xử lý (Pending)</option>
                         <option value="confirmed" {{ $order->status === 'confirmed' ? 'selected' : '' }}>Đã xác nhận (Confirmed)</option>
                         <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Đã hoàn thành (Completed)</option>
-                        <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Đủy đơn hàng (Cancelled)</option>
+                        <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Hủy đơn hàng (Cancelled)</option>
                     </select>
                 </div>
 
-                @if($order->status !== 'cancelled')
+                @if($order->status !== 'cancelled' && $order->shipping_status !== 'cancelled')
                     <div class="alert alert-warning py-2 px-3 small my-3" style="border-radius: 8px; border-left: 3px solid #d97706;">
                         <i class="fa-solid fa-circle-info mr-1 text-warning"></i> 
-                        <strong>Lưu ý:</strong> Khi bạn chọn <strong>Đã hủy</strong>, toàn bộ số lượng sản phẩm trong đơn sẽ tự động cộng hoàn lại tồn kho.
+                        <strong>Lưu ý:</strong> Khi chọn <strong>Hủy đơn</strong>, số lượng sản phẩm sẽ tự động cộng hoàn lại tồn kho. Khi chọn <strong>Giao hàng thành công</strong>, đơn hàng sẽ tự động chuyển sang Đã hoàn thành.
                     </div>
                 @else
                     <div class="alert alert-info py-2 px-3 small my-3" style="border-radius: 8px; border-left: 3px solid #2563eb;">
