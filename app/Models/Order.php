@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Order extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'customer_name',
+        'name',
+        'address',
+        'phone',
+        'total_price',
+        'status',
+        'shipping_status',
+        // Các trường GHN:
+        'ghn_order_code',
+        'ghn_total_fee',
+        'to_district_id',
+        'to_ward_code',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'total_price' => 'decimal:0',
+            'ghn_total_fee' => 'integer',
+            'to_district_id' => 'integer',
+        ];
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->attributes['name'] ?? $this->attributes['customer_name'] ?? null;
+    }
+
+    public function setNameAttribute(?string $value): void
+    {
+        $this->attributes['name'] = $value;
+        if (!isset($this->attributes['customer_name']) || empty($this->attributes['customer_name'])) {
+            $this->attributes['customer_name'] = $value;
+        }
+    }
+
+    public function setCustomerNameAttribute(?string $value): void
+    {
+        $this->attributes['customer_name'] = $value;
+        if (!isset($this->attributes['name']) || empty($this->attributes['name'])) {
+            $this->attributes['name'] = $value;
+        }
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function paymentTransactions(): HasMany
+    {
+        return $this->hasMany(PaymentTransaction::class);
+    }
+}

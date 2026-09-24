@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="momoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#db2777" />
+      <stop offset="100%" stop-color="#a50064" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="url(#momoGrad)"/>
+  <!-- Stylized MoMo Face / Logo Icon -->
+  <g fill="#ffffff">
+    <!-- Top 'mo' -->
+    <path d="M38 34 c-4.4 0-8 3.6-8 8 v14 h7 v-12 c0-2.2 1.8-4 4-4 s4 1.8 4 4 v12 h7 v-12 c0-2.2 1.8-4 4-4 s4 1.8 4 4 v12 h7 V42 c0-4.4-3.6-8-8-8 c-3.2 0-6 1.9-7.2 4.6 C46 35.9 41.2 34 38 34 z" />
+    <circle cx="75" cy="45" r="11" fill="none" stroke="#ffffff" stroke-width="7"/>
+    <!-- Bottom 'mo' -->
+    <path d="M38 64 c-4.4 0-8 3.6-8 8 v14 h7 v-12 c0-2.2 1.8-4 4-4 s4 1.8 4 4 v12 h7 v-12 c0-2.2 1.8-4 4-4 s4 1.8 4 4 v12 h7 V72 c0-4.4-3.6-8-8-8 c-3.2 0-6 1.9-7.2 4.6 C46 65.9 41.2 64 38 64 z" />
+    <circle cx="75" cy="75" r="11" fill="none" stroke="#ffffff" stroke-width="7"/>
+  </g>
+</svg>

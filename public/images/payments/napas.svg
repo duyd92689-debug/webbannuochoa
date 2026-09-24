@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" width="160" height="50">
+  <!-- NAPAS Official Brand Mark -->
+  <g id="napas-logo">
+    <text x="5" y="36" font-family="'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="34" fill="#005BA6" letter-spacing="-1">napas</text>
+    <!-- Three colorful dots/rings above letter 's' / end of wordmark -->
+    <circle cx="118" cy="18" r="4.5" fill="#00A3E0"/>
+    <circle cx="132" cy="13" r="5" fill="#78BE20"/>
+    <circle cx="147" cy="18" r="5.5" fill="#F37021"/>
+  </g>
+</svg>

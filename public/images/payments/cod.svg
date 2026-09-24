@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <rect x="6" y="16" width="52" height="32" rx="6" fill="#10b981"/>
+  <rect x="10" y="20" width="44" height="24" rx="4" stroke="#ffffff" stroke-width="2" stroke-opacity="0.6"/>
+  <circle cx="32" cy="32" r="7" fill="#ffffff" fill-opacity="0.3"/>
+  <text x="32" y="36" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="14" fill="#ffffff" text-anchor="middle">₫</text>
+  <!-- Fast Delivery Truck or Hand Coins -->
+  <path d="M18 42 L22 52 L42 52 L46 42" stroke="#047857" stroke-width="2" stroke-linejoin="round"/>
+</svg>

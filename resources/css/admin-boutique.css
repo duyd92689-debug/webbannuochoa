@@ -1,0 +1,56 @@
+/* A restrained rose theme for the existing Bootstrap administration pages. */
+.boutique-admin,.boutique-admin-login {
+    --pink:#b34665; --pink-dark:#963550; --pink-main:#b34665; --pink-light:#ecc1ce; --pink-pale:#f9e8ee; --pink-soft:#fff7fa;
+    --blush:#f5dce5; --text-dark:#38282e; --text-mid:#735864; --text-muted:#8b737f; --border:#efdee5;
+    background:#fffafb; color:#38282e;
+}
+.boutique-admin .admin-sidebar { border-color:#efdee5; box-shadow:none; }
+.boutique-admin .sidebar-brand { padding:26px 22px; }
+.boutique-admin .brand-icon { background:#fff2f7; color:#a83d5d; border:1px solid #eed3df; box-shadow:none; border-radius:50%; width:43px; height:43px; }
+.boutique-admin .sidebar-menu a { border-radius:5px; padding-block:13px; }
+.boutique-admin .sidebar-menu a.active { background:#fbeef4; border-left-color:#a83d5d; }
+.boutique-admin .sidebar-section-label { font-size:10px; color:#8b6f7d; }
+.boutique-admin .admin-topbar { height:76px; box-shadow:none; border-bottom:1px solid #efdee5; }
+.boutique-admin .topbar-left h1 { font-size:19px; font-weight:600; }
+.boutique-admin .topbar-badge { background:#fff2f7; color:#a83d5d; border:1px solid #edcedc; }
+.boutique-admin .admin-avatar { background:#a83d5d; }
+.boutique-admin .admin-content-area { padding:30px 32px; }
+.boutique-admin :is(.admin-card,.card,.stat-card) { border:1px solid #efdee5; border-radius:9px; box-shadow:0 5px 24px #58304705; }
+.boutique-admin .card-header { background:#fff; border-bottom:1px solid #f0e3e9; padding-block:19px; }
+.boutique-admin :is(.btn-primary,.btn-pink) { background:#a83d5d!important; border-color:#a83d5d!important; border-radius:5px; box-shadow:none; }
+.boutique-admin .form-control { border:1px solid #e6d5de; border-radius:5px; min-height:42px; }
+.boutique-admin .form-control:focus { border-color:#b36d88; box-shadow:0 0 0 3px #b36d8812; }
+.boutique-admin .table thead th { background:#fff6f9; color:#7b5265; font-weight:600; font-size:12px; border-bottom:1px solid #efdee5; }
+.boutique-admin .table td { padding-block:17px; vertical-align:middle; }
+.boutique-admin .pagination .page-item.active .page-link { background:#a83d5d; border-color:#a83d5d; }
+.ht-admin-toggle { display:none; align-items:center; gap:6px; padding:8px; background:#fff7fa; color:#a83d5d; border:1px solid #edcedb; border-radius:4px; font-size:11px; }
+.ht-admin-backdrop { position:fixed; inset:0; width:100%; height:100%; border:0; background:#36232e55; z-index:99; }
+.ht-admin-backdrop[hidden] { display:none; }
+.boutique-admin-login { background:radial-gradient(ellipse at 10% 10%,#f7dee8,transparent 55%),#fff8fb; }
+.boutique-admin-login::before,.boutique-admin-login::after { display:none; }
+.boutique-admin-login .login-card { border:1px solid #ecd5df; border-radius:12px; box-shadow:0 20px 80px #6b3a5110; }
+.boutique-admin-login .login-header { background:#fff6f9; border-bottom:1px solid #f0dde6; }
+.boutique-admin-login .brand-icon-wrap { background:#a83d5d; box-shadow:none; }
+.boutique-admin-login .brand-title { color:#553643; }
+.boutique-admin-login .btn-admin-login { background:#a83d5d; box-shadow:none; border-radius:5px; }
+.boutique-admin-login .form-control { border-radius:5px; border-color:#e7d5de; }
+.boutique-admin :focus-visible,.boutique-admin-login :focus-visible { outline:2px solid #a83d5d; outline-offset:3px; }
+@media(max-width:991px) {
+    .ht-admin-toggle { display:inline-flex; }
+    .boutique-admin .admin-sidebar { width:240px; transform:translateX(-100%); transition:transform .2s; min-height:100dvh; height:100dvh; overflow-y:auto; }
+    .boutique-admin .admin-main-wrapper { margin-left:0; width:100%; }
+    .boutique-admin.admin-menu-open { overflow:hidden; }
+    .boutique-admin.admin-menu-open .admin-sidebar { transform:translateX(0); }
+    .boutique-admin .admin-sidebar .brand-text,.boutique-admin .sidebar-menu a span,.boutique-admin .sidebar-section-label,.boutique-admin .sidebar-footer { display:block; }
+    .boutique-admin .admin-topbar { padding:0 18px; height:67px; }
+    .boutique-admin .admin-content-area { padding:22px 18px; }
+    .boutique-admin .topbar-date { display:none; }
+}
+@media(max-width:540px) {
+    .boutique-admin .topbar-left h1 { font-size:15px; }
+    .boutique-admin .topbar-badge { display:none; }
+    .boutique-admin .admin-content-area { padding:18px 12px; }
+    .boutique-admin .table-responsive { border-radius:7px; }
+    .boutique-admin .form-control,.boutique-admin-login .form-control { font-size:16px; }
+}
+@media(prefers-reduced-motion:reduce) { .boutique-admin *,.boutique-admin-login * { animation:none!important; transition:none!important; } }
